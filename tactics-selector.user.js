@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         MZ Tactic Selector
-// @namespace    /essenfc
+// @namespace    essenfc
 // @version      0.1
 // @description  Adds a dropdown menu to automatically set up tactics.
 // @author       Douglas Vieira
@@ -23,42 +23,53 @@
     formationContainer.style.alignItems = "center";
     formationContainer.style.justifyContent = "space-between";
 
-    // Create the description
-    let description = document.createElement("span");
-    description.textContent = "Select a preset custom tactic: ";
-    description.style.marginRight = "10px";
-
-    // Create the dropdown menu
+    // Create and style the dropdown menu
     let dropdown = document.createElement("select");
     dropdown.id = "tacticsDropdown";
+    dropdown.style.padding = "2px";
+    dropdown.style.fontSize = "12px";
+    dropdown.style.borderRadius = "2px";
 
-    // Style the dropdown
-    dropdown.style.padding = "5px";
-    dropdown.style.fontSize = "16px";
-    dropdown.style.borderRadius = "5px";
+    // Create description for dropdown menu
+    let description = document.createElement("span");
+    description.textContent = "Select a preset custom tactic: ";
+    description.style.marginRight = "5px";
 
-    // Add a placeholder option
+    // Add placeholder option
     let placeholder = document.createElement("option");
     placeholder.value = "";
-    placeholder.text = "-";
+    placeholder.text = "@";
     placeholder.disabled = true;
     placeholder.selected = true;
     dropdown.appendChild(placeholder);
 
-    // Add options for each tactic
+    // Add tactic options to dropdown menu
     let tactics = ["JPL_test", "Morph"];
-    for (let i = 0; i < tactics.length; ++i) {
+    for (const element of tactics) {
       let option = document.createElement("option");
-      option.value = tactics[i];
-      option.text = tactics[i];
+      option.value = element;
+      option.text = element;
       dropdown.appendChild(option);
     }
 
-    // Add the description and the dropdown menu to the formation-container div
+    // Create needed button for < 10 players case
+    let button = document.createElement("button");
+    button.textContent = "";
+    button.style.margin = "2px";
+    button.style.visibility = "hidden";
+    button.addEventListener("click", function () {
+      let presetDropdown = document.getElementById("tactics_preset");
+      presetDropdown.value = "4-4-2";
+      let e = new Event("change");
+      presetDropdown.dispatchEvent(e);
+    });
+
+    // Add the description/dropdown menu, and the button to the formation-container div
     formationContainer.appendChild(description);
     formationContainer.appendChild(dropdown);
+    formationContainer.appendChild(button);
 
-    // Define the tactics
+    // Tactics that will be displayed on the dropdown menu
     let tacticCoordinates = {
       JPL_test: [
         [97, 194],
@@ -86,21 +97,36 @@
       ],
     };
 
-    // Add an event listener to the dropdown menu
+    // Handle dropdown menu options
     dropdown.addEventListener("change", function () {
-      // Get the selected tactic
       let tactic = this.value;
 
-      // Get the outfield players
       let outfieldPlayers = Array.from(
-        document.querySelectorAll(".fieldpos:not(.substitute):not(.goalkeeper)")
+        document.querySelectorAll(
+          ".fieldpos.fieldpos-ok.ui-draggable:not(.substitute):not(.substitute.goalkeeper):not(.goalkeeper)"
+        )
       );
 
-      // Move the players based on the selected tactic
-      let coordinates = tacticCoordinates[tactic];
-      for (let i = 0; i < outfieldPlayers.length; i++) {
-        outfieldPlayers[i].style.left = coordinates[i][0] + "px";
-        outfieldPlayers[i].style.top = coordinates[i][1] + "px";
+      let rearrangePlayers = function () {
+        outfieldPlayers = Array.from(
+          document.querySelectorAll(
+            ".fieldpos.fieldpos-ok.ui-draggable:not(.substitute):not(.substitute.goalkeeper):not(.goalkeeper)"
+          )
+        );
+
+        // Move the players based on the selected tactic
+        let coordinates = tacticCoordinates[tactic];
+        for (let i = 0; i < outfieldPlayers.length; ++i) {
+          outfieldPlayers[i].style.left = coordinates[i][0] + "px";
+          outfieldPlayers[i].style.top = coordinates[i][1] + "px";
+        }
+      };
+
+      if (outfieldPlayers.length < 10) {
+        button.click();
+        setTimeout(rearrangePlayers, 1);
+      } else {
+        rearrangePlayers();
       }
     });
   });
