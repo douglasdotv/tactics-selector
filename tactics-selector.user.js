@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
-// @version      0.2
-// @description  Adds a dropdown menu to automatically set up tactics.
+// @version      0.5
+// @description  Adds a dropdown menu to choose from a list of overused tactics.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=managerzone.com
@@ -10,61 +10,40 @@
 // @license      MIT
 // ==/UserScript==
 
+const fontLink = document.createElement("link");
+fontLink.href =
+  "https://fonts.googleapis.com/css2?family=Montserrat&display=swap";
+fontLink.rel = "stylesheet";
+document.head.appendChild(fontLink);
+
 (function () {
   "use strict";
 
+  let tactics = [];
+  const tacticsDataUrl =
+    "https://raw.githubusercontent.com/douglasdotv/tactics-selector/main/tactics.json?callback=?";
+
   window.addEventListener("load", function () {
-    let formationContainer = document.getElementById("formation-container");
+    const formationContainer = document.getElementById("formation-container");
     formationContainer.style.display = "flex";
     formationContainer.style.alignItems = "center";
     formationContainer.style.justifyContent = "space-between";
 
-    let dropdown = document.createElement("select");
-    dropdown.id = "tacticsDropdown";
-    dropdown.style.padding = "1px";
-    dropdown.style.fontSize = "12px";
-    dropdown.style.borderRadius = "2px";
+    const dropdown = createDropdown();
+    const dropdownDescription = createDropdownDescription();
+    const hButton = createHButton();
 
-    let dropdownDescription = document.createElement("span");
-    dropdownDescription.textContent = "Select a custom tactic: ";
-    dropdownDescription.style.marginRight = "1px";
+    formationContainer.appendChild(dropdownDescription);
+    formationContainer.appendChild(dropdown);
+    formationContainer.appendChild(hButton);
 
-    let placeholderOption = document.createElement("option");
-    placeholderOption.value = "";
-    placeholderOption.text = "@";
-    placeholderOption.disabled = true;
-    placeholderOption.selected = true;
-    dropdown.appendChild(placeholderOption);
-
-    let tacticsDataUrl =
-      "https://raw.githubusercontent.com/douglasdotv/tactics-selector/main/data.json?callback=?";
-    fetch(tacticsDataUrl)
-      .then((response) => response.json())
+    fetchTacticsData()
       .then((data) => {
-        for (const tactic of data.tactics) {
-          let option = document.createElement("option");
-          option.value = tactic.name;
-          option.text = tactic.name;
-          dropdown.appendChild(option);
-        }
-
-        let neededButton = document.createElement("button");
-        neededButton.textContent = "";
-        neededButton.style.margin = "1px";
-        neededButton.style.visibility = "hidden";
-        neededButton.addEventListener("click", function () {
-          let presetDropdown = document.getElementById("tactics_preset");
-          presetDropdown.value = "4-4-2";
-          let e = new Event("change");
-          presetDropdown.dispatchEvent(e);
-        });
-
-        formationContainer.appendChild(dropdownDescription);
-        formationContainer.appendChild(dropdown);
-        formationContainer.appendChild(neededButton);
+        tactics = data.tactics;
+        addTacticsToDropdown(dropdown, tactics);
 
         dropdown.addEventListener("change", function () {
-          let tactic = this.value;
+          const tactic = this.value;
 
           let outfieldPlayers = Array.from(
             document.querySelectorAll(
@@ -72,38 +51,107 @@
             )
           );
 
-          let rearrangePlayers = function () {
-            outfieldPlayers = Array.from(
-              document.querySelectorAll(
-                ".fieldpos.fieldpos-ok.ui-draggable:not(.substitute):not(.substitute.goalkeeper):not(.goalkeeper)"
-              )
-            );
+          const selectedTactic = data.tactics.find(
+            (tacticData) => tacticData.name === tactic
+          );
 
-            let coordinates = {};
-            const selectedTactic = data.tactics.find(
-              (tacticData) => tacticData.name === tactic
-            );
-
-            if (selectedTactic) {
-              coordinates = selectedTactic.coordinates;
+          if (selectedTactic) {
+            if (outfieldPlayers.length < 10) {
+              hButton.click();
+              setTimeout(() => rearrangePlayers(selectedTactic.coordinates), 1);
+            } else {
+              rearrangePlayers(selectedTactic.coordinates);
             }
-
-            for (let i = 0; i < outfieldPlayers.length; ++i) {
-              outfieldPlayers[i].style.left = coordinates[i][0] + "px";
-              outfieldPlayers[i].style.top = coordinates[i][1] + "px";
-            }
-          };
-
-          if (outfieldPlayers.length < 10) {
-            neededButton.click();
-            setTimeout(rearrangePlayers, 1);
-          } else {
-            rearrangePlayers();
           }
         });
       })
-      .catch((error) => {
-        console.error('Epic fail: ', error);
+      .catch((err) => {
+        console.error("Couldn't fetch data: ", err);
       });
   });
+
+  function createDropdown() {
+    const dropdown = document.createElement("select");
+    setupDropdown(dropdown);
+
+    const placeholderOption = createPlaceholderOption();
+    dropdown.appendChild(placeholderOption);
+
+    return dropdown;
+  }
+
+  function setupDropdown(dd) {
+    dd.id = "tacticsDropdown";
+    dd.style.padding = "2px 5px";
+    dd.style.fontSize = "12px";
+    dd.style.fontFamily = "Montserrat, sans-serif";
+    dd.style.border = "2px solid #000";
+    dd.style.borderRadius = "5px";
+    dd.style.background = "linear-gradient(to right, #add8e6, #e6f7ff)";
+    dd.style.color = "#000";
+    dd.style.boxShadow = "3px 3px 5px rgba(0, 0, 0, 0.2)";
+    dd.style.cursor = "pointer";
+    dd.style.outline = "none";
+  }
+
+  function createPlaceholderOption() {
+    const placeholderOption = document.createElement("option");
+    placeholderOption.value = "";
+    placeholderOption.text = "";
+    placeholderOption.disabled = true;
+    placeholderOption.selected = true;
+    return placeholderOption;
+  }
+
+  function createDropdownDescription() {
+    const dropdownDescription = document.createElement("span");
+    dropdownDescription.textContent = "Select a custom tactic: ";
+    dropdownDescription.style.marginRight = "1px";
+    dropdownDescription.style.fontFamily = "Montserrat, sans-serif";
+    dropdownDescription.style.fontSize = "12px";
+    dropdownDescription.style.color = "#000";
+    return dropdownDescription;
+  }
+
+  function createHButton() {
+    const button = document.createElement("button");
+    button.textContent = "";
+    button.style.margin = "1px";
+    button.style.visibility = "hidden";
+
+    button.addEventListener("click", function () {
+      const presetDropdown = document.getElementById("tactics_preset");
+      presetDropdown.value = "4-4-2";
+      presetDropdown.dispatchEvent(new Event("change"));
+    });
+
+    return button;
+  }
+
+  async function fetchTacticsData() {
+    const response = await fetch(tacticsDataUrl);
+    return await response.json();
+  }
+
+  function addTacticsToDropdown(dropdown, tactics) {
+    for (const tactic of tactics) {
+      const option = document.createElement("option");
+      option.value = tactic.name;
+      option.text = tactic.name;
+      dropdown.appendChild(option);
+    }
+  }
+
+  function rearrangePlayers(coordinates) {
+    const outfieldPlayers = Array.from(
+      document.querySelectorAll(
+        ".fieldpos.fieldpos-ok.ui-draggable:not(.substitute):not(.goalkeeper):not(.substitute.goalkeeper)"
+      )
+    );
+
+    for (let i = 0; i < outfieldPlayers.length; ++i) {
+      outfieldPlayers[i].style.left = coordinates[i][0] + "px";
+      outfieldPlayers[i].style.top = coordinates[i][1] + "px";
+    }
+  }
 })();
