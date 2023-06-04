@@ -5,6 +5,7 @@
 // @description  Adds a dropdown menu to choose from a list of overused tactics.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
+// @match        https://www.managerzone.com/?p=national_teams&sub=tactics&type=*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=managerzone.com
 // @grant        none
 // @license      MIT
