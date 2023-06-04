@@ -31,7 +31,7 @@ document.head.appendChild(fontLink);
 
     const dropdown = createDropdown();
     const dropdownDescription = createDropdownDescription();
-    const hButton = createHButton();
+    const hButton = createHiButton();
 
     formationContainer.appendChild(dropdownDescription);
     formationContainer.appendChild(dropdown);
@@ -47,7 +47,7 @@ document.head.appendChild(fontLink);
 
           let outfieldPlayers = Array.from(
             document.querySelectorAll(
-              ".fieldpos.fieldpos-ok.ui-draggable:not(.substitute):not(.substitute.goalkeeper):not(.goalkeeper)"
+              ".fieldpos.fieldpos-ok.ui-draggable:not(.substitute):not(.substitute.goalkeeper):not(.goalkeeper), .fieldpos.fieldpos-collision.ui-draggable:not(.substitute):not(.substitute.goalkeeper):not(.goalkeeper)"
             )
           );
 
@@ -113,15 +113,14 @@ document.head.appendChild(fontLink);
     return dropdownDescription;
   }
 
-  function createHButton() {
+  function createHiButton() {
     const button = document.createElement("button");
     button.textContent = "";
-    button.style.margin = "1px";
     button.style.visibility = "hidden";
 
     button.addEventListener("click", function () {
       const presetDropdown = document.getElementById("tactics_preset");
-      presetDropdown.value = "4-4-2";
+      presetDropdown.value = "5-3-2";
       presetDropdown.dispatchEvent(new Event("change"));
     });
 
@@ -145,13 +144,18 @@ document.head.appendChild(fontLink);
   function rearrangePlayers(coordinates) {
     const outfieldPlayers = Array.from(
       document.querySelectorAll(
-        ".fieldpos.fieldpos-ok.ui-draggable:not(.substitute):not(.goalkeeper):not(.substitute.goalkeeper)"
+        ".fieldpos.fieldpos-ok.ui-draggable:not(.substitute):not(.goalkeeper):not(.substitute.goalkeeper), .fieldpos.fieldpos-collision.ui-draggable:not(.substitute):not(.goalkeeper):not(.substitute.goalkeeper)"
       )
     );
 
     for (let i = 0; i < outfieldPlayers.length; ++i) {
       outfieldPlayers[i].style.left = coordinates[i][0] + "px";
       outfieldPlayers[i].style.top = coordinates[i][1] + "px";
+
+      if (outfieldPlayers[i].classList.contains("fieldpos-collision")) {
+        outfieldPlayers[i].classList.remove("fieldpos-collision");
+        outfieldPlayers[i].classList.add("fieldpos-ok");
+      }
     }
   }
 })();
