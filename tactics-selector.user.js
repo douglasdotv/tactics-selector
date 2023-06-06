@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
-// @version      3.2
+// @version      3.3
 // @description  Adds a dropdown menu with overused tactics.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
@@ -552,7 +552,7 @@ let modal;
     const modal = document.createElement("div");
     setupInfoModal(modal);
 
-    const modalContent = createInfoModalContent();
+    const modalContent = createModalContent();
     modal.appendChild(modalContent);
 
     window.onclick = function (event) {
@@ -576,13 +576,15 @@ let modal;
     modal.style.transition = "opacity 0.5s ease-in-out";
   }
 
-  function createInfoModalContent() {
+  function createModalContent() {
     const modalContent = document.createElement("div");
     styleModalContent(modalContent);
 
+    const title = createTitle();
     const infoText = createInfoText();
     const feedbackText = createFeedbackText();
 
+    modalContent.appendChild(title);
     modalContent.appendChild(infoText);
     modalContent.appendChild(feedbackText);
 
@@ -602,6 +604,15 @@ let modal;
     content.style.color = "#000";
     content.style.fontSize = "16px";
     content.style.lineHeight = "1.5";
+  }
+
+  function createTitle() {
+    const title = document.createElement("h2");
+    title.textContent = "MZ Tactics Selector";
+    title.style.fontSize = "24px";
+    title.style.fontWeight = "bold";
+    title.style.marginBottom = "20px";
+    return title;
   }
 
   function createInfoText() {
@@ -630,10 +641,6 @@ let modal;
     element.parentNode.insertBefore(toBeInserted, element.nextSibling);
   }
 
-  function isSoccerTacticsPage() {
-    return document.getElementById("tactics_box").classList.contains("soccer");
-  }
-
   function generateUniqueId() {
     let currentDate = new Date();
 
@@ -652,5 +659,9 @@ let modal;
 
     let randomShit = Math.random().toString(36).substring(2, 15);
     return dateTimeId + "_" + randomShit;
+  }
+
+  function isSoccerTacticsPage() {
+    return document.getElementById("tactics_box").classList.contains("soccer");
   }
 })();
