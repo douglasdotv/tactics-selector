@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
-// @version      2.1
+// @version      2.2
 // @description  Adds a dropdown menu with overused tactics.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
@@ -299,11 +299,15 @@ document.head.appendChild(fontLink);
     }
 
     const tacticsData = (await GM_getValue("ls_tactics")) || { tactics: [] };
-
     if (tacticsData.tactics.some((t) => t.name === name)) {
       alert(
         "Error: a tactic with this name already exists. Please choose a different name."
       );
+      return false;
+    }
+
+    if (name.length > 50) {
+      alert("Error: tactic name must be less than 50 characters.");
       return false;
     }
 
