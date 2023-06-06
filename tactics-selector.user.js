@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
-// @version      1.0
+// @version      1.2
 // @description  Adds a dropdown menu with overused tactics.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
@@ -234,13 +234,11 @@ document.head.appendChild(fontLink);
     let outfieldPlayers = Array.from(
       document.querySelectorAll(outfieldPlayersSelector)
     );
-  
     if (!validateTacticPlayerCount(outfieldPlayers)) {
       return;
     }
   
     const tacticName = prompt("Please enter a name for your tactic: ");
-  
     const isValidName = await validateTacticName(tacticName);
     if (!isValidName) {
       return;
@@ -250,7 +248,7 @@ document.head.appendChild(fontLink);
       parseInt(player.style.left),
       parseInt(player.style.top),
     ]);
-  
+    
     let tactic = {
       name: tacticName,
       coordinates,
@@ -259,6 +257,8 @@ document.head.appendChild(fontLink);
   
     saveTacticToStorage(tactic).catch(console.error);
     addTacticsToDropdown(dropdown, [tactic]);
+
+    dropdownTactics.push(tactic);
 
     dropdown.value = tactic.name;
     handleTacticSelection(tactic.name);
