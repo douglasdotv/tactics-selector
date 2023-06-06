@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
-// @version      3.3
+// @version      3.7
 // @description  Adds a dropdown menu with overused tactics.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
@@ -37,8 +37,8 @@ let modal;
     const dropdownDescription = createDropdownDescription();
     const addNewTacticBtn = createAddNewTacticButton();
     const deleteTacticBtn = createDeleteTacticButton();
-    const createRenameTacticBtn = createRenameTacticButton();
-    const createUpdateTacticBtn = createUpdateTacticButton();
+    const renameTacticBtn = createRenameTacticButton();
+    const updateTacticBtn = createUpdateTacticButton();
     const aboutBtn = createAboutButton();
     const hiBtn = createHiButton();
 
@@ -47,8 +47,8 @@ let modal;
       dropdown,
       addNewTacticBtn,
       deleteTacticBtn,
-      createRenameTacticBtn,
-      createUpdateTacticBtn,
+      renameTacticBtn,
+      updateTacticBtn,
       aboutBtn,
       hiBtn,
     ]);
@@ -137,7 +137,7 @@ let modal;
 
   function createDropdownDescription() {
     const description = document.createElement("span");
-    description.textContent = "Select a custom tactic: ";
+    description.textContent = "Select a tactic: ";
     description.style.fontFamily = "Montserrat, sans-serif";
     description.style.fontSize = "12px";
     description.style.color = "#000";
@@ -229,7 +229,7 @@ let modal;
   function createAddNewTacticButton() {
     const button = document.createElement("button");
     button.id = "addNewTacticButton";
-    button.textContent = "Save tactic";
+    button.textContent = "Add current tactic";
     button.style.fontFamily = "Montserrat, sans-serif";
     button.style.fontSize = "12px";
     button.style.color = "#000";
@@ -253,7 +253,7 @@ let modal;
       return;
     }
 
-    const tacticName = prompt("Please enter a name for your tactic: ");
+    const tacticName = prompt("Please enter a name for the tactic: ");
     const isValidName = await validateTacticName(tacticName);
     if (!isValidName) {
       return;
@@ -272,11 +272,12 @@ let modal;
 
     saveTacticToStorage(tactic).catch(console.error);
     addTacticsToDropdown(dropdown, [tactic]);
-
     dropdownTactics.push(tactic);
 
     dropdown.value = tactic.name;
     handleTacticSelection(tactic.name);
+
+    alert("A new tactic has been added.");
   }
 
   function validateTacticPlayerCount(outfieldPlayers) {
@@ -289,7 +290,9 @@ let modal;
     );
 
     if (outfieldPlayers.length < 10 || !isGoalkeeper) {
-      alert("Error: invalid tactic.");
+      alert(
+        "Error: invalid tactic. You must have 1 goalkeeper and 10 outfield players in valid positions."
+      );
       return false;
     }
 
@@ -298,7 +301,7 @@ let modal;
 
   async function validateTacticName(name) {
     if (!name) {
-      alert("Error: you must provide a name for your tactic.");
+      alert("Error: you must provide a name for the tactic.");
       return false;
     }
 
@@ -444,6 +447,8 @@ let modal;
 
     selectedOption.value = newName;
     selectedOption.textContent = newName;
+
+    alert("Tactic was successfully renamed!");
   }
 
   // _____Update tactic_____
@@ -525,12 +530,14 @@ let modal;
     button.style.color = "#000";
     button.style.marginLeft = "6px";
     button.style.cursor = "pointer";
+
     button.addEventListener("click", function (event) {
-      event.stopPropagation(); // Prevent the click event from bubbling up to the document
+      event.stopPropagation();
       if (modal.style.display === "none" || modal.style.opacity === "0") {
         showInfo();
       }
     });
+
     return button;
   }
 
@@ -629,7 +636,7 @@ let modal;
     return feedbackText;
   }
 
-  // _____Other functions_____
+  // _____Other_____
 
   function appendChildren(element, children) {
     children.forEach((ch) => {
@@ -643,8 +650,7 @@ let modal;
 
   function generateUniqueId() {
     let currentDate = new Date();
-
-    let dateTimeId =
+    return (
       currentDate.getFullYear() +
       "-" +
       (currentDate.getMonth() + 1) +
@@ -655,10 +661,10 @@ let modal;
       "-" +
       currentDate.getMinutes() +
       "-" +
-      currentDate.getSeconds();
-
-    let randomShit = Math.random().toString(36).substring(2, 15);
-    return dateTimeId + "_" + randomShit;
+      currentDate.getSeconds() +
+      "_" +
+      Math.random().toString(36).substring(2, 15)
+    );
   }
 
   function isSoccerTacticsPage() {
