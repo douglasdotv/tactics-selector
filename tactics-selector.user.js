@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
-// @version      1.2
+// @version      2.0
 // @description  Adds a dropdown menu with overused tactics.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
@@ -34,14 +34,20 @@ document.head.appendChild(fontLink);
 
     const dropdown = createDropdownMenu();
     const dropdownDescription = createDropdownDescription();
-    const addNewTacticButton = createAddNewTacticButton();
-    const hiButton = createHiButton();
+    const addNewTacticBtn = createAddNewTacticButton();
+    const deleteTacticBtn = createDeleteTacticButton();
+    const createRenameTacticBtn = createRenameTacticButton();
+    const createUpdateTacticBtn = createUpdateTacticButton();
+    const hiBtn = createHiButton();
 
     appendChildren(tacSelDiv, [
       dropdownDescription,
       dropdown,
-      addNewTacticButton,
-      hiButton,
+      addNewTacticBtn,
+      deleteTacticBtn,
+      createRenameTacticBtn,
+      createUpdateTacticBtn,
+      hiBtn,
     ]);
 
     const tacticsBox = document.getElementById("tactics_box");
@@ -214,7 +220,7 @@ document.head.appendChild(fontLink);
   function createAddNewTacticButton() {
     const button = document.createElement("button");
     button.id = "addNewTacticButton";
-    button.textContent = "Save Current Tactic";
+    button.textContent = "Save tactic";
     button.style.fontFamily = "Montserrat, sans-serif";
     button.style.fontSize = "12px";
     button.style.color = "#000";
@@ -230,31 +236,31 @@ document.head.appendChild(fontLink);
 
   async function addNewTactic() {
     let dropdown = document.getElementById("tacticsDropdown");
-  
+
     let outfieldPlayers = Array.from(
       document.querySelectorAll(outfieldPlayersSelector)
     );
     if (!validateTacticPlayerCount(outfieldPlayers)) {
       return;
     }
-  
+
     const tacticName = prompt("Please enter a name for your tactic: ");
     const isValidName = await validateTacticName(tacticName);
     if (!isValidName) {
       return;
     }
-  
+
     let coordinates = outfieldPlayers.map((player) => [
       parseInt(player.style.left),
       parseInt(player.style.top),
     ]);
-    
+
     let tactic = {
       name: tacticName,
       coordinates,
       id: generateUniqueId(),
     };
-  
+
     saveTacticToStorage(tactic).catch(console.error);
     addTacticsToDropdown(dropdown, [tactic]);
 
@@ -322,6 +328,196 @@ document.head.appendChild(fontLink);
   async function saveTacticToStorage(tactic) {
     const tacticsData = (await GM_getValue("ls_tactics")) || { tactics: [] };
     tacticsData.tactics.push(tactic);
+    await GM_setValue("ls_tactics", tacticsData);
+  }
+
+  // _____Delete tactic_____
+
+  function createDeleteTacticButton() {
+    const button = document.createElement("button");
+    button.id = "deleteTacticButton";
+    button.textContent = "Delete tactic";
+    button.style.fontFamily = "Montserrat, sans-serif";
+    button.style.fontSize = "12px";
+    button.style.color = "#000";
+    button.style.marginLeft = "6px";
+    button.style.cursor = "pointer";
+
+    button.addEventListener("click", function () {
+      deleteTactic().catch(console.error);
+    });
+
+    return button;
+  }
+
+  async function deleteTactic() {
+    let dropdown = document.getElementById("tacticsDropdown");
+    let selectedTactic = dropdownTactics.find(
+      (tactic) => tactic.name === dropdown.value
+    );
+
+    if (!selectedTactic) {
+      alert("Error: no tactic selected.");
+      return;
+    }
+
+    const confirmed = confirm(
+      `Are you sure you want to delete the tactic "${selectedTactic.name}"?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    alert(`Tactic "${selectedTactic.name}" was successfully deleted!`);
+
+    const tacticsData = (await GM_getValue("ls_tactics")) || { tactics: [] };
+    tacticsData.tactics = tacticsData.tactics.filter(
+      (tactic) => tactic.id !== selectedTactic.id
+    );
+
+    await GM_setValue("ls_tactics", tacticsData);
+
+    dropdownTactics = dropdownTactics.filter(
+      (tactic) => tactic.id !== selectedTactic.id
+    );
+
+    const selectedOption = Array.from(dropdown.options).find(
+      (option) => option.value === selectedTactic.name
+    );
+    dropdown.remove(selectedOption.index);
+
+    if (dropdown.options[0]?.disabled) {
+      dropdown.selectedIndex = 0;
+    }
+  }
+
+  // _____Rename tactic_____
+
+  function createRenameTacticButton() {
+    const button = document.createElement("button");
+    button.id = "renameTacticButton";
+    button.textContent = "Rename tactic";
+    button.style.fontFamily = "Montserrat, sans-serif";
+    button.style.fontSize = "12px";
+    button.style.color = "#000";
+    button.style.marginLeft = "6px";
+    button.style.cursor = "pointer";
+
+    button.addEventListener("click", function () {
+      renameTactic().catch(console.error);
+    });
+
+    return button;
+  }
+
+  async function renameTactic() {
+    let dropdown = document.getElementById("tacticsDropdown");
+    let selectedTactic = dropdownTactics.find(
+      (tactic) => tactic.name === dropdown.value
+    );
+
+    if (!selectedTactic) {
+      alert("Error: no tactic selected.");
+      return;
+    }
+
+    const newName = prompt("Please enter a new name for this tactic: ");
+    const isValidName = await validateTacticName(newName);
+    if (!isValidName) {
+      return;
+    }
+
+    const selectedOption = Array.from(dropdown.options).find(
+      (option) => option.value === selectedTactic.name
+    );
+
+    const tacticsData = (await GM_getValue("ls_tactics")) || { tactics: [] };
+    tacticsData.tactics = tacticsData.tactics.map((tactic) => {
+      if (tactic.id === selectedTactic.id) {
+        tactic.name = newName;
+      }
+      return tactic;
+    });
+
+    await GM_setValue("ls_tactics", tacticsData);
+
+    dropdownTactics = dropdownTactics.map((tactic) => {
+      if (tactic.id === selectedTactic.id) {
+        tactic.name = newName;
+      }
+      return tactic;
+    });
+
+    selectedOption.value = newName;
+    selectedOption.textContent = newName;
+  }
+
+  // _____Update tactic_____
+
+  function createUpdateTacticButton() {
+    const button = document.createElement("button");
+    button.id = "updateTacticButton";
+    button.textContent = "Update tactic";
+    button.style.fontFamily = "Montserrat, sans-serif";
+    button.style.fontSize = "12px";
+    button.style.color = "#000";
+    button.style.marginLeft = "6px";
+    button.style.cursor = "pointer";
+
+    button.addEventListener("click", function () {
+      updateTactic().catch(console.error);
+    });
+
+    return button;
+  }
+
+  async function updateTactic() {
+    let dropdown = document.getElementById("tacticsDropdown");
+    let outfieldPlayers = Array.from(
+      document.querySelectorAll(outfieldPlayersSelector)
+    );
+
+    let selectedTactic = dropdownTactics.find(
+      (tactic) => tactic.name === dropdown.value
+    );
+
+    if (!selectedTactic) {
+      alert("Error: no tactic selected.");
+      return;
+    }
+
+    const confirmed = confirm(
+      `Are you sure you want to update "${selectedTactic.name}" coordinates?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    alert(
+      `Tactic "${selectedTactic.name}" coordinates were successfully updated!`
+    );
+
+    let updatedCoordinates = outfieldPlayers.map((player) => [
+      parseInt(player.style.left),
+      parseInt(player.style.top),
+    ]);
+
+    const tacticsData = (await GM_getValue("ls_tactics")) || { tactics: [] };
+
+    for (let tactic of tacticsData.tactics) {
+      if (tactic.id === selectedTactic.id) {
+        tactic.coordinates = updatedCoordinates;
+      }
+    }
+
+    for (let tactic of dropdownTactics) {
+      if (tactic.id === selectedTactic.id) {
+        tactic.coordinates = updatedCoordinates;
+      }
+    }
+
     await GM_setValue("ls_tactics", tacticsData);
   }
 
