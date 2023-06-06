@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
-// @version      3.0
+// @version      3.2
 // @description  Adds a dropdown menu with overused tactics.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
@@ -32,8 +32,7 @@ let modal;
     ".fieldpos.fieldpos-ok.ui-draggable:not(.substitute):not(.goalkeeper):not(.substitute.goalkeeper), .fieldpos.fieldpos-collision.ui-draggable:not(.substitute):not(.goalkeeper):not(.substitute.goalkeeper)";
 
   window.addEventListener("load", function () {
-    const tacSelDiv = createTacSelDiv();
-
+    const tacticsSelectorDiv = createTacSelDiv();
     const dropdown = createDropdownMenu();
     const dropdownDescription = createDropdownDescription();
     const addNewTacticBtn = createAddNewTacticButton();
@@ -43,7 +42,7 @@ let modal;
     const aboutBtn = createAboutButton();
     const hiBtn = createHiButton();
 
-    appendChildren(tacSelDiv, [
+    appendChildren(tacticsSelectorDiv, [
       dropdownDescription,
       dropdown,
       addNewTacticBtn,
@@ -54,8 +53,12 @@ let modal;
       hiBtn,
     ]);
 
-    const tacticsBox = document.getElementById("tactics_box");
-    insertAfterElement(tacSelDiv, tacticsBox);
+    if (isSoccerTacticsPage()) {
+      insertAfterElement(
+        tacticsSelectorDiv,
+        document.getElementById("tactics_box")
+      );
+    }
 
     modal = createInfoModal();
     document.body.appendChild(modal);
@@ -86,7 +89,7 @@ let modal;
 
   function createTacSelDiv() {
     const myDiv = document.createElement("div");
-    myDiv.id = "tacSelDiv";
+    myDiv.id = "tactics_selector_div";
     myDiv.style.width = "100%";
     myDiv.style.display = "flex";
     myDiv.style.flexWrap = "wrap";
@@ -154,16 +157,6 @@ let modal;
     });
 
     return button;
-  }
-
-  function appendChildren(element, children) {
-    children.forEach((ch) => {
-      element.appendChild(ch);
-    });
-  }
-
-  function insertAfterElement(toBeInserted, element) {
-    element.parentNode.insertBefore(toBeInserted, element.nextSibling);
   }
 
   async function fetchTacticsFromLocalStorage() {
@@ -323,26 +316,6 @@ let modal;
     }
 
     return true;
-  }
-
-  function generateUniqueId() {
-    let currentDate = new Date();
-
-    let dateTimeId =
-      currentDate.getFullYear() +
-      "-" +
-      (currentDate.getMonth() + 1) +
-      "-" +
-      currentDate.getDate() +
-      "_" +
-      currentDate.getHours() +
-      "-" +
-      currentDate.getMinutes() +
-      "-" +
-      currentDate.getSeconds();
-
-    let randomShit = Math.random().toString(36).substring(2, 15);
-    return dateTimeId + "_" + randomShit;
   }
 
   async function saveTacticToStorage(tactic) {
@@ -643,5 +616,41 @@ let modal;
     feedbackText.innerHTML =
       'If you run into any issues or have any suggestions, contact me here: <a href="https://www.managerzone.com/?p=guestbook&uid=8577497"><img src="https://www.managerzone.com/img/soccer/reply_guestbook.gif"></a>';
     return feedbackText;
+  }
+
+  // _____Other functions_____
+
+  function appendChildren(element, children) {
+    children.forEach((ch) => {
+      element.appendChild(ch);
+    });
+  }
+
+  function insertAfterElement(toBeInserted, element) {
+    element.parentNode.insertBefore(toBeInserted, element.nextSibling);
+  }
+
+  function isSoccerTacticsPage() {
+    return document.getElementById("tactics_box").classList.contains("soccer");
+  }
+
+  function generateUniqueId() {
+    let currentDate = new Date();
+
+    let dateTimeId =
+      currentDate.getFullYear() +
+      "-" +
+      (currentDate.getMonth() + 1) +
+      "-" +
+      currentDate.getDate() +
+      "_" +
+      currentDate.getHours() +
+      "-" +
+      currentDate.getMinutes() +
+      "-" +
+      currentDate.getSeconds();
+
+    let randomShit = Math.random().toString(36).substring(2, 15);
+    return dateTimeId + "_" + randomShit;
   }
 })();
