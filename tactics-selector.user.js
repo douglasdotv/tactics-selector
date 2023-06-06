@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
-// @version      2.2
+// @version      2.7
 // @description  Adds a dropdown menu with overused tactics.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
@@ -72,13 +72,12 @@ document.head.appendChild(fontLink);
       });
   });
 
-  logGMStorage();
-
   function createTacSelDiv() {
     const myDiv = document.createElement("div");
     myDiv.id = "tacSelDiv";
     myDiv.style.width = "100%";
     myDiv.style.display = "flex";
+    myDiv.style.flexWrap = "wrap";
     myDiv.style.alignItems = "center";
     myDiv.style.justifyContent = "flex-start";
     myDiv.style.marginTop = "6px";
@@ -528,9 +527,5 @@ document.head.appendChild(fontLink);
     }
 
     await GM_setValue("ls_tactics", tacticsData);
-  }
-
-  function logGMStorage() {
-    console.log("Tactic Selector GM Storage: ", GM_getValue("ls_tactics"));
   }
 })();
