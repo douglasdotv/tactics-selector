@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
-// @version      2.7
+// @version      3.0
 // @description  Adds a dropdown menu with overused tactics.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
@@ -18,16 +18,18 @@ fontLink.href =
 fontLink.rel = "stylesheet";
 document.head.appendChild(fontLink);
 
+let modal;
+
 (function () {
   "use strict";
 
   let dropdownTactics = [];
 
-  const tacticsDataUrl =
+  const defaultTacticsDataUrl =
     "https://raw.githubusercontent.com/douglasdotv/tactics-selector/main/tactics.json?callback=?";
 
-  const outfieldPlayersSelector = `.fieldpos.fieldpos-ok.ui-draggable:not(.substitute):not(.goalkeeper):not(.substitute.goalkeeper),
-  .fieldpos.fieldpos-collision.ui-draggable:not(.substitute):not(.goalkeeper):not(.substitute.goalkeeper)`;
+  const outfieldPlayersSelector =
+    ".fieldpos.fieldpos-ok.ui-draggable:not(.substitute):not(.goalkeeper):not(.substitute.goalkeeper), .fieldpos.fieldpos-collision.ui-draggable:not(.substitute):not(.goalkeeper):not(.substitute.goalkeeper)";
 
   window.addEventListener("load", function () {
     const tacSelDiv = createTacSelDiv();
@@ -38,6 +40,7 @@ document.head.appendChild(fontLink);
     const deleteTacticBtn = createDeleteTacticButton();
     const createRenameTacticBtn = createRenameTacticButton();
     const createUpdateTacticBtn = createUpdateTacticButton();
+    const aboutBtn = createAboutButton();
     const hiBtn = createHiButton();
 
     appendChildren(tacSelDiv, [
@@ -47,16 +50,25 @@ document.head.appendChild(fontLink);
       deleteTacticBtn,
       createRenameTacticBtn,
       createUpdateTacticBtn,
+      aboutBtn,
       hiBtn,
     ]);
 
     const tacticsBox = document.getElementById("tactics_box");
     insertAfterElement(tacSelDiv, tacticsBox);
 
+    modal = createInfoModal();
+    document.body.appendChild(modal);
+    document.addEventListener("click", function (event) {
+      if (modal.style.display === "block" && !modal.contains(event.target)) {
+        modal.style.display = "none";
+      }
+    });
+
     fetchTacticsFromLocalStorage()
       .then((data) => {
         dropdownTactics = data.tactics;
-        
+
         dropdownTactics.sort((a, b) => {
           return a.name.localeCompare(b.name);
         });
@@ -166,7 +178,7 @@ document.head.appendChild(fontLink);
   }
 
   async function fetchTacticsFromJson() {
-    const response = await fetch(tacticsDataUrl);
+    const response = await fetch(defaultTacticsDataUrl);
     return await response.json();
   }
 
@@ -527,5 +539,109 @@ document.head.appendChild(fontLink);
     }
 
     await GM_setValue("ls_tactics", tacticsData);
+  }
+
+  // _____About button_____
+
+  function createAboutButton() {
+    const button = document.createElement("button");
+    button.id = "aboutButton";
+    button.textContent = "About";
+    button.style.fontFamily = "Montserrat, sans-serif";
+    button.style.fontSize = "12px";
+    button.style.color = "#000";
+    button.style.marginLeft = "6px";
+    button.style.cursor = "pointer";
+    button.addEventListener("click", function (event) {
+      event.stopPropagation(); // Prevent the click event from bubbling up to the document
+      if (modal.style.display === "none" || modal.style.opacity === "0") {
+        showInfo();
+      }
+    });
+    return button;
+  }
+
+  function showInfo() {
+    modal.style.display = "block";
+    setTimeout(function () {
+      modal.style.opacity = "1";
+    }, 0);
+  }
+
+  function hideInfo() {
+    modal.style.opacity = "0";
+    setTimeout(function () {
+      modal.style.display = "none";
+    }, 500);
+  }
+
+  function createInfoModal() {
+    const modal = document.createElement("div");
+    setupInfoModal(modal);
+
+    const modalContent = createInfoModalContent();
+    modal.appendChild(modalContent);
+
+    window.onclick = function (event) {
+      if (event.target == modal) {
+        hideInfo();
+      }
+    };
+
+    return modal;
+  }
+
+  function setupInfoModal(modal) {
+    modal.id = "infoModal";
+    modal.style.display = "none";
+    modal.style.position = "fixed";
+    modal.style.zIndex = "1";
+    modal.style.left = "50%";
+    modal.style.top = "50%";
+    modal.style.transform = "translate(-50%, -50%)";
+    modal.style.opacity = "0";
+    modal.style.transition = "opacity 0.5s ease-in-out";
+  }
+
+  function createInfoModalContent() {
+    const modalContent = document.createElement("div");
+    styleModalContent(modalContent);
+
+    const infoText = createInfoText();
+    const feedbackText = createFeedbackText();
+
+    modalContent.appendChild(infoText);
+    modalContent.appendChild(feedbackText);
+
+    return modalContent;
+  }
+
+  function styleModalContent(content) {
+    content.style.backgroundColor = "#fefefe";
+    content.style.margin = "auto";
+    content.style.padding = "20px";
+    content.style.border = "1px solid #888";
+    content.style.width = "80%";
+    content.style.maxWidth = "500px";
+    content.style.borderRadius = "10px";
+    content.style.fontFamily = "Montserrat, sans-serif";
+    content.style.textAlign = "center";
+    content.style.color = "#000";
+    content.style.fontSize = "16px";
+    content.style.lineHeight = "1.5";
+  }
+
+  function createInfoText() {
+    const infoText = document.createElement("p");
+    infoText.innerHTML =
+      'For instructions, click <a href="https://greasyfork.org/pt-BR/scripts/467712-mz-tactics-selector" style="color: #007BFF;">here</a>.';
+    return infoText;
+  }
+
+  function createFeedbackText() {
+    const feedbackText = document.createElement("p");
+    feedbackText.innerHTML =
+      'If you run into any issues or have any suggestions, contact me here: <a href="https://www.managerzone.com/?p=guestbook&uid=8577497"><img src="https://www.managerzone.com/img/soccer/reply_guestbook.gif"></a>';
+    return feedbackText;
   }
 })();
