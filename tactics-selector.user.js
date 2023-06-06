@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
-// @version      2.0
+// @version      2.1
 // @description  Adds a dropdown menu with overused tactics.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
@@ -56,6 +56,11 @@ document.head.appendChild(fontLink);
     fetchTacticsFromLocalStorage()
       .then((data) => {
         dropdownTactics = data.tactics;
+        
+        dropdownTactics.sort((a, b) => {
+          return a.name.localeCompare(b.name);
+        });
+
         addTacticsToDropdown(dropdown, dropdownTactics);
 
         dropdown.addEventListener("change", function () {
