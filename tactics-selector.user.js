@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
-// @version      4.1
+// @version      4.2
 // @description  Adds a dropdown menu with overused tactics.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
@@ -651,12 +651,24 @@ let modal;
       const reader = new FileReader();
 
       reader.onload = async function (event) {
-        const tactics = JSON.parse(event.target.result);
-        await GM_setValue("ls_tactics", tactics);
+        const importedTactics = JSON.parse(event.target.result).tactics;
 
-        dropdownTactics = tactics.tactics.sort((a, b) =>
-          a.name.localeCompare(b.name)
-        );
+        let existingTactics = await GM_getValue("ls_tactics", { tactics: [] });
+        existingTactics = existingTactics.tactics;
+
+        const mergedTactics = [...existingTactics];
+        for (const importedTactic of importedTactics) {
+          if (
+            !existingTactics.some((tactic) => tactic.id === importedTactic.id)
+          ) {
+            mergedTactics.push(importedTactic);
+          }
+        }
+
+        await GM_setValue("ls_tactics", { tactics: mergedTactics });
+
+        mergedTactics.sort((a, b) => a.name.localeCompare(b.name));
+        dropdownTactics = mergedTactics;
 
         const dropdown = document.getElementById("tacticsDropdown");
         dropdown.innerHTML = "";
