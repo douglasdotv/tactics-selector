@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
-// @version      4.0
+// @version      4.1
 // @description  Adds a dropdown menu with overused tactics.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
@@ -41,6 +41,8 @@ let modal;
     const updateTacticBtn = createUpdateTacticButton();
     const clearTacticsBtn = createClearTacticsButton();
     const resetTacticsBtn = createResetTacticsButton();
+    const importTacticsBtn = createImportTacticsButton();
+    const exportTacticsBtn = createExportTacticsButton();
     const aboutBtn = createAboutButton();
     const hiBtn = createHiButton();
 
@@ -53,6 +55,8 @@ let modal;
       updateTacticBtn,
       clearTacticsBtn,
       resetTacticsBtn,
+      importTacticsBtn,
+      exportTacticsBtn,
       aboutBtn,
       hiBtn,
     ]);
@@ -603,6 +607,82 @@ let modal;
     dropdown.disabled = false;
 
     alert("Reset done!");
+  }
+
+  // _____Import/Export_____
+
+  function createImportTacticsButton() {
+    const button = document.createElement("button");
+    button.id = "importButton";
+    button.textContent = "Import tactics";
+    button.style.fontFamily = "Montserrat, sans-serif";
+    button.style.fontSize = "12px";
+    button.style.color = "#000";
+    button.style.marginLeft = "6px";
+    button.style.cursor = "pointer";
+
+    button.addEventListener("click", function () {
+      importTactics().catch(console.error);
+    });
+
+    return button;
+  }
+
+  function createExportTacticsButton() {
+    const button = document.createElement("button");
+    button.id = "exportButton";
+    button.textContent = "Export tactics";
+    button.style.fontFamily = "Montserrat, sans-serif";
+    button.style.fontSize = "12px";
+    button.style.color = "#000";
+    button.style.marginLeft = "6px";
+    button.style.cursor = "pointer";
+    button.addEventListener("click", exportTactics);
+    return button;
+  }
+
+  async function importTactics() {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json";
+
+    input.onchange = async function (event) {
+      const file = event.target.files[0];
+      const reader = new FileReader();
+
+      reader.onload = async function (event) {
+        const tactics = JSON.parse(event.target.result);
+        await GM_setValue("ls_tactics", tactics);
+
+        dropdownTactics = tactics.tactics.sort((a, b) =>
+          a.name.localeCompare(b.name)
+        );
+
+        const dropdown = document.getElementById("tacticsDropdown");
+        dropdown.innerHTML = "";
+        dropdown.append(createPlaceholderOption());
+        addTacticsToDropdown(dropdown, dropdownTactics);
+        dropdown.disabled = false;
+      };
+
+      reader.readAsText(file);
+    };
+
+    input.click();
+  }
+
+  function exportTactics() {
+    const tactics = GM_getValue("ls_tactics", { tactics: [] });
+    const tacticsJson = JSON.stringify(tactics);
+    const blob = new Blob([tacticsJson], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "tactics.json";
+    link.click();
+
+    URL.revokeObjectURL(url);
   }
 
   // _____About button_____
