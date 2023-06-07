@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
-// @version      3.7
+// @version      4.0
 // @description  Adds a dropdown menu with overused tactics.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
@@ -39,6 +39,8 @@ let modal;
     const deleteTacticBtn = createDeleteTacticButton();
     const renameTacticBtn = createRenameTacticButton();
     const updateTacticBtn = createUpdateTacticButton();
+    const clearTacticsBtn = createClearTacticsButton();
+    const resetTacticsBtn = createResetTacticsButton();
     const aboutBtn = createAboutButton();
     const hiBtn = createHiButton();
 
@@ -49,6 +51,8 @@ let modal;
       deleteTacticBtn,
       renameTacticBtn,
       updateTacticBtn,
+      clearTacticsBtn,
+      resetTacticsBtn,
       aboutBtn,
       hiBtn,
     ]);
@@ -517,6 +521,88 @@ let modal;
     }
 
     await GM_setValue("ls_tactics", tacticsData);
+  }
+
+  // _____Clear tactics_____
+
+  function createClearTacticsButton() {
+    const button = document.createElement("button");
+    button.id = "clearButton";
+    button.textContent = "Clear tactics";
+    button.style.fontFamily = "Montserrat, sans-serif";
+    button.style.fontSize = "12px";
+    button.style.color = "#000";
+    button.style.marginLeft = "6px";
+    button.style.cursor = "pointer";
+
+    button.addEventListener("click", function () {
+      clearTactics().catch(console.error);
+    });
+
+    return button;
+  }
+
+  async function clearTactics() {
+    const confirmed = confirm(
+      "Are you sure you want to clear all tactics? This action will delete all saved tactics and cannot be undone."
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    await GM_setValue("ls_tactics", { tactics: [] });
+    dropdownTactics = [];
+
+    const dropdown = document.getElementById("tacticsDropdown");
+    dropdown.innerHTML = "";
+    dropdown.disabled = true;
+
+    alert("Tactics successfully cleared!");
+  }
+
+  // _____Reset default settings_____
+
+  function createResetTacticsButton() {
+    const button = document.createElement("button");
+    button.id = "resetButton";
+    button.textContent = "Reset tactics";
+    button.style.fontFamily = "Montserrat, sans-serif";
+    button.style.fontSize = "12px";
+    button.style.color = "#000";
+    button.style.marginLeft = "6px";
+    button.style.cursor = "pointer";
+
+    button.addEventListener("click", function () {
+      resetTactics().catch(console.error);
+    });
+
+    return button;
+  }
+
+  async function resetTactics() {
+    const confirmed = confirm(
+      "Are you sure you want to reset? This action will overwrite all saved tactics and cannot be undone."
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    const response = await fetch(defaultTacticsDataUrl);
+    const data = await response.json();
+    const defaultTactics = data.tactics;
+
+    await GM_setValue("ls_tactics", { tactics: defaultTactics });
+    dropdownTactics = defaultTactics;
+
+    const dropdown = document.getElementById("tacticsDropdown");
+    dropdown.innerHTML = "";
+    dropdown.appendChild(createPlaceholderOption());
+    addTacticsToDropdown(dropdown, dropdownTactics);
+    dropdown.disabled = false;
+
+    alert("Reset done!");
   }
 
   // _____About button_____
