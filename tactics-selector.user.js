@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
-// @version      4.5
+// @version      4.6
 // @description  Adds a dropdown menu with overused tactics.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
@@ -20,12 +20,19 @@
   let dropdownTactics = [];
 
   const defaultTacticsDataUrl =
-    "https://raw.githubusercontent.com/douglasdotv/tactics-selector/main/tactics.json?callback=?";
+    "https://raw.githubusercontent.com/douglasdotv/tactics-selector/main/json/tactics.json?callback=?";
+
+  const tacticsBox = document.getElementById("tactics_box");
+
+  const tacticsPreset = document.getElementById("tactics_preset");
 
   const outfieldPlayersSelector =
     ".fieldpos.fieldpos-ok.ui-draggable:not(.substitute):not(.goalkeeper):not(.substitute.goalkeeper), .fieldpos.fieldpos-collision.ui-draggable:not(.substitute):not(.goalkeeper):not(.substitute.goalkeeper)";
+
   const goalkeeperSelector = ".fieldpos.fieldpos-ok.goalkeeper.ui-draggable";
+
   const minOutfieldPlayers = 10;
+
   const maxTacticNameLength = 50;
 
   window.addEventListener("load", function () {
@@ -41,7 +48,7 @@
     const importTacticsBtn = createImportTacticsButton();
     const exportTacticsBtn = createExportTacticsButton();
     const aboutBtn = createAboutButton();
-    const hiBtn = createHiButton();
+    const hiddenTriggerBtn = createHiddenTriggerButton();
 
     appendChildren(tacticsSelectorDiv, [
       dropdownDescription,
@@ -55,14 +62,11 @@
       importTacticsBtn,
       exportTacticsBtn,
       aboutBtn,
-      hiBtn,
+      hiddenTriggerBtn,
     ]);
 
     if (isSoccerTacticsPage()) {
-      insertAfterElement(
-        tacticsSelectorDiv,
-        document.getElementById("tactics_box")
-      );
+      insertAfterElement(tacticsSelectorDiv, tacticsBox);
     }
 
     fetchTacticsFromLocalStorage()
@@ -84,11 +88,14 @@
       });
   });
 
-  const modal = createInfoModal();
-  document.body.appendChild(modal);
+  const infoModal = createInfoModal();
+  document.body.appendChild(infoModal);
   document.addEventListener("click", function (event) {
-    if (modal.style.display === "block" && !modal.contains(event.target)) {
-      modal.style.display = "none";
+    if (
+      infoModal.style.display === "block" &&
+      !infoModal.contains(event.target)
+    ) {
+      infoModal.style.display = "none";
     }
   });
 
@@ -96,20 +103,13 @@
 
   function createTacSelDiv() {
     const div = document.createElement("div");
-    div.id = "tactics_selector_div";
-    div.style.width = "100%";
-    div.style.display = "flex";
-    div.style.flexWrap = "wrap";
-    div.style.alignItems = "center";
-    div.style.justifyContent = "flex-start";
-    div.style.marginTop = "6px";
-    div.style.marginLeft = "6px";
+    setupMainDiv(div);
     return div;
   }
 
   function createDropdownMenu() {
     const dropdown = document.createElement("select");
-    setupDropdownMenu(dropdown);
+    setupDropdownMenu(dropdown, "tactics_dropdown_menu");
 
     const placeholderOption = createPlaceholderOption();
     appendChildren(dropdown, [placeholderOption]);
@@ -117,48 +117,21 @@
     return dropdown;
   }
 
-  function setupDropdownMenu(dropdown) {
-    dropdown.id = "tacticsDropdown";
-    dropdown.style.fontSize = "12px";
-    dropdown.style.fontFamily = "Montserrat, sans-serif";
-    dropdown.style.border = "2px solid #000";
-    dropdown.style.borderRadius = "2px";
-    dropdown.style.background = "linear-gradient(to right, #add8e6, #e6f7ff)";
-    dropdown.style.color = "#000";
-    dropdown.style.boxShadow = "3px 3px 5px rgba(0, 0, 0, 0.2)";
-    dropdown.style.cursor = "pointer";
-    dropdown.style.outline = "none";
-    dropdown.style.margin = "6px";
-  }
-
-  function createPlaceholderOption() {
-    const placeholderOption = document.createElement("option");
-    placeholderOption.value = "";
-    placeholderOption.text = "";
-    placeholderOption.disabled = true;
-    placeholderOption.selected = true;
-    return placeholderOption;
-  }
-
   function createDropdownDescription() {
     const description = document.createElement("span");
-    description.textContent = "Select a tactic: ";
-    description.style.fontFamily = "Montserrat, sans-serif";
-    description.style.fontSize = "12px";
-    description.style.color = "#000";
+    setupDropdownMenuLabel(description, "dropdown_description", "Select a tactic: ");
     return description;
   }
 
-  function createHiButton() {
+  function createHiddenTriggerButton() {
     const button = document.createElement("button");
-    button.id = "hiButton";
+    button.id = "hidden_trigger_button";
     button.textContent = "";
     button.style.visibility = "hidden";
 
     button.addEventListener("click", function () {
-      const presetDropdown = document.getElementById("tactics_preset");
-      presetDropdown.value = "5-3-2";
-      presetDropdown.dispatchEvent(new Event("change"));
+      tacticsPreset.value = "5-3-2";
+      tacticsPreset.dispatchEvent(new Event("change"));
     });
 
     return button;
@@ -204,8 +177,10 @@
 
     if (selectedTactic) {
       if (outfieldPlayers.length < minOutfieldPlayers) {
-        const hiButton = document.getElementById("hiButton");
-        hiButton.click();
+        const hiddenTriggerButton = document.getElementById(
+          "hidden_trigger_button"
+        );
+        hiddenTriggerButton.click();
         setTimeout(() => rearrangePlayers(selectedTactic.coordinates), 1);
       } else {
         rearrangePlayers(selectedTactic.coordinates);
@@ -247,7 +222,7 @@
     let defenders = 0;
 
     for (const coo of coordinates) {
-      let y = coo[1];
+      const y = coo[1];
       if (y < 103) {
         strikers++;
       } else if (y <= 204) {
@@ -274,7 +249,7 @@
 
   function createAddNewTacticButton() {
     const button = document.createElement("button");
-    setupButton(button, "addNewTacticButton", "Add current tactic");
+    setupButton(button, "add_button", "Add current tactic");
 
     button.addEventListener("click", function () {
       addNewTactic().catch(console.error);
@@ -284,7 +259,7 @@
   }
 
   async function addNewTactic() {
-    const dropdown = document.getElementById("tacticsDropdown");
+    const tacticsDropdown = document.getElementById("tactics_dropdown_menu");
 
     const outfieldPlayers = Array.from(
       document.querySelectorAll(outfieldPlayersSelector)
@@ -311,10 +286,10 @@
     };
 
     saveTacticToStorage(tactic).catch(console.error);
-    addTacticsToDropdown(dropdown, [tactic]);
+    addTacticsToDropdown(tacticsDropdown, [tactic]);
     dropdownTactics.push(tactic);
 
-    dropdown.value = tactic.name;
+    tacticsDropdown.value = tactic.name;
     handleTacticSelection(tactic.name);
 
     alert(`Tactic "${tactic.name}" has been added.`);
@@ -369,7 +344,7 @@
 
   function createDeleteTacticButton() {
     const button = document.createElement("button");
-    setupButton(button, "deleteTacticButton", "Delete tactic");
+    setupButton(button, "delete_button", "Delete tactic");
 
     button.addEventListener("click", function () {
       deleteTactic().catch(console.error);
@@ -379,9 +354,9 @@
   }
 
   async function deleteTactic() {
-    const dropdown = document.getElementById("tacticsDropdown");
+    const tacticsDropdown = document.getElementById("tactics_dropdown_menu");
     const selectedTactic = dropdownTactics.find(
-      (tactic) => tactic.name === dropdown.value
+      (tactic) => tactic.name === tacticsDropdown.value
     );
 
     if (!selectedTactic) {
@@ -408,13 +383,13 @@
       (tactic) => tactic.id !== selectedTactic.id
     );
 
-    const selectedOption = Array.from(dropdown.options).find(
+    const selectedOption = Array.from(tacticsDropdown.options).find(
       (option) => option.value === selectedTactic.name
     );
-    dropdown.remove(selectedOption.index);
+    tacticsDropdown.remove(selectedOption.index);
 
-    if (dropdown.options[0]?.disabled) {
-      dropdown.selectedIndex = 0;
+    if (tacticsDropdown.options[0]?.disabled) {
+      tacticsDropdown.selectedIndex = 0;
     }
 
     alert(`Tactic "${selectedTactic.name}" was successfully deleted!`);
@@ -424,7 +399,7 @@
 
   function createRenameTacticButton() {
     const button = document.createElement("button");
-    setupButton(button, "renameTacticButton", "Rename tactic");
+    setupButton(button, "rename_button", "Rename tactic");
 
     button.addEventListener("click", function () {
       renameTactic().catch(console.error);
@@ -434,9 +409,9 @@
   }
 
   async function renameTactic() {
-    const dropdown = document.getElementById("tacticsDropdown");
+    const tacticsDropdown = document.getElementById("tactics_dropdown_menu");
     const selectedTactic = dropdownTactics.find(
-      (tactic) => tactic.name === dropdown.value
+      (tactic) => tactic.name === tacticsDropdown.value
     );
 
     if (!selectedTactic) {
@@ -452,7 +427,7 @@
       return;
     }
 
-    const selectedOption = Array.from(dropdown.options).find(
+    const selectedOption = Array.from(tacticsDropdown.options).find(
       (option) => option.value === selectedTactic.name
     );
 
@@ -483,7 +458,7 @@
 
   function createUpdateTacticButton() {
     const button = document.createElement("button");
-    setupButton(button, "updateTacticButton", "Update tactic");
+    setupButton(button, "update_button", "Update tactic");
 
     button.addEventListener("click", function () {
       updateTactic().catch(console.error);
@@ -493,13 +468,15 @@
   }
 
   async function updateTactic() {
-    const dropdown = document.getElementById("tacticsDropdown");
+    const tacticsDropdown = document.getElementById("tactics_dropdown");
     const outfieldPlayers = Array.from(
       document.querySelectorAll(outfieldPlayersSelector)
     );
 
+    const tacticsDropdown = document.getElementById("tactics_dropdown_menu");
+
     const selectedTactic = dropdownTactics.find(
-      (tactic) => tactic.name === dropdown.value
+      (tactic) => tactic.name === tacticsDropdown.value
     );
 
     if (!selectedTactic) {
@@ -545,7 +522,7 @@
 
   function createClearTacticsButton() {
     const button = document.createElement("button");
-    setupButton(button, "clearTacticsButton", "Clear tactics");
+    setupButton(button, "clear_button", "Clear tactics");
 
     button.addEventListener("click", function () {
       clearTactics().catch(console.error);
@@ -566,9 +543,9 @@
     await GM_setValue("ls_tactics", { tactics: [] });
     dropdownTactics = [];
 
-    const dropdown = document.getElementById("tacticsDropdown");
-    dropdown.innerHTML = "";
-    dropdown.disabled = true;
+    const tacticsDropdown = document.getElementById("tactics_dropdown_menu");
+    tacticsDropdown.innerHTML = "";
+    tacticsDropdown.disabled = true;
 
     alert("Tactics successfully cleared!");
   }
@@ -577,7 +554,7 @@
 
   function createResetTacticsButton() {
     const button = document.createElement("button");
-    setupButton(button, "resetButton", "Reset tactics");
+    setupButton(button, "reset_button", "Reset tactics");
 
     button.addEventListener("click", function () {
       resetTactics().catch(console.error);
@@ -602,11 +579,11 @@
     await GM_setValue("ls_tactics", { tactics: defaultTactics });
     dropdownTactics = defaultTactics;
 
-    const dropdown = document.getElementById("tacticsDropdown");
-    dropdown.innerHTML = "";
-    dropdown.appendChild(createPlaceholderOption());
-    addTacticsToDropdown(dropdown, dropdownTactics);
-    dropdown.disabled = false;
+    const tacticsDropdown = document.getElementById("tactics_dropdown_menu");
+    tacticsDropdown.innerHTML = "";
+    tacticsDropdown.appendChild(createPlaceholderOption());
+    addTacticsToDropdown(tacticsDropdown, dropdownTactics);
+    tacticsDropdown.disabled = false;
 
     alert("Reset done!");
   }
@@ -615,7 +592,7 @@
 
   function createImportTacticsButton() {
     const button = document.createElement("button");
-    setupButton(button, "importButton", "Import tactics");
+    setupButton(button, "import_button", "Import tactics");
 
     button.addEventListener("click", function () {
       importTactics().catch(console.error);
@@ -626,7 +603,7 @@
 
   function createExportTacticsButton() {
     const button = document.createElement("button");
-    setupButton(button, "exportButton", "Export tactics");
+    setupButton(button, "export_button", "Export tactics");
     button.addEventListener("click", exportTactics);
     return button;
   }
@@ -656,15 +633,15 @@
         }
 
         await GM_setValue("ls_tactics", { tactics: mergedTactics });
-
         mergedTactics.sort((a, b) => a.name.localeCompare(b.name));
+
         dropdownTactics = mergedTactics;
 
-        const dropdown = document.getElementById("tacticsDropdown");
-        dropdown.innerHTML = "";
-        dropdown.append(createPlaceholderOption());
-        addTacticsToDropdown(dropdown, dropdownTactics);
-        dropdown.disabled = false;
+        const tacticsDropdown = document.getElementById("tactics_dropdown_menu");
+        tacticsDropdown.innerHTML = "";
+        tacticsDropdown.append(createPlaceholderOption());
+        addTacticsToDropdown(tacticsDropdown, dropdownTactics);
+        tacticsDropdown.disabled = false;
       };
 
       reader.readAsText(file);
@@ -691,11 +668,14 @@
 
   function createAboutButton() {
     const button = document.createElement("button");
-    setupButton(button, "aboutButton", "About");
+    setupButton(button, "about_button", "About");
 
     button.addEventListener("click", function (event) {
       event.stopPropagation();
-      if (modal.style.display === "none" || modal.style.opacity === "0") {
+      if (
+        infoModal.style.display === "none" ||
+        infoModal.style.opacity === "0"
+      ) {
         showInfo();
       }
     });
@@ -704,22 +684,22 @@
   }
 
   function showInfo() {
-    modal.style.display = "block";
+    infoModal.style.display = "block";
     setTimeout(function () {
-      modal.style.opacity = "1";
+      infoModal.style.opacity = "1";
     }, 0);
   }
 
   function hideInfo() {
-    modal.style.opacity = "0";
+    infoModal.style.opacity = "0";
     setTimeout(function () {
-      modal.style.display = "none";
+      infoModal.style.display = "none";
     }, 500);
   }
 
   function createInfoModal() {
     const modal = document.createElement("div");
-    setupInfoModal(modal);
+    setupModal(modal, "info_modal");
 
     const modalContent = createModalContent();
     modal.appendChild(modalContent);
@@ -733,8 +713,8 @@
     return modal;
   }
 
-  function setupInfoModal(modal) {
-    modal.id = "infoModal";
+  function setupModal(modal, id) {
+    modal.id = id;
     modal.style.display = "none";
     modal.style.position = "fixed";
     modal.style.zIndex = "1";
@@ -808,6 +788,10 @@
     return fontLink;
   }
 
+  function isSoccerTacticsPage() {
+    return document.getElementById("tactics_box").classList.contains("soccer");
+  }
+
   function appendChildren(parent, children) {
     children.forEach((ch) => {
       parent.appendChild(ch);
@@ -816,6 +800,48 @@
 
   function insertAfterElement(something, element) {
     element.parentNode.insertBefore(something, element.nextSibling);
+  }
+
+  function setupMainDiv(div) {
+    div.id = "tactics_selector_div";
+    div.style.width = "100%";
+    div.style.display = "flex";
+    div.style.flexWrap = "wrap";
+    div.style.alignItems = "center";
+    div.style.justifyContent = "flex-start";
+    div.style.marginTop = "6px";
+    div.style.marginLeft = "6px";
+  }
+
+  function setupDropdownMenu(dropdown, id) {
+    dropdown.id = id;
+    dropdown.style.fontSize = "12px";
+    dropdown.style.fontFamily = "Montserrat, sans-serif";
+    dropdown.style.border = "2px solid #000";
+    dropdown.style.borderRadius = "2px";
+    dropdown.style.background = "linear-gradient(to right, #add8e6, #e6f7ff)";
+    dropdown.style.color = "#000";
+    dropdown.style.boxShadow = "3px 3px 5px rgba(0, 0, 0, 0.2)";
+    dropdown.style.cursor = "pointer";
+    dropdown.style.outline = "none";
+    dropdown.style.margin = "6px";
+  }
+
+  function createPlaceholderOption() {
+    const placeholderOption = document.createElement("option");
+    placeholderOption.value = "";
+    placeholderOption.text = "";
+    placeholderOption.disabled = true;
+    placeholderOption.selected = true;
+    return placeholderOption;
+  }
+
+  function setupDropdownMenuLabel(description, id, textContent) {
+    description.id = id;
+    description.textContent = textContent;
+    description.style.fontFamily = "Montserrat, sans-serif";
+    description.style.fontSize = "12px";
+    description.style.color = "#000";
   }
 
   function setupButton(button, id, textContent) {
@@ -846,9 +872,5 @@
       "_" +
       Math.random().toString(36).substring(2, 15)
     );
-  }
-
-  function isSoccerTacticsPage() {
-    return document.getElementById("tactics_box").classList.contains("soccer");
   }
 })();
