@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
-// @version      4.3
+// @version      4.4
 // @description  Adds a dropdown menu with overused tactics.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
@@ -12,16 +12,10 @@
 // @license      MIT
 // ==/UserScript==
 
-const fontLink = document.createElement("link");
-fontLink.href =
-  "https://fonts.googleapis.com/css2?family=Montserrat&display=swap";
-fontLink.rel = "stylesheet";
-document.head.appendChild(fontLink);
-
-let modal;
-
 (function () {
   "use strict";
+
+  document.head.appendChild(getFontLink());
 
   let dropdownTactics = [];
 
@@ -30,6 +24,9 @@ let modal;
 
   const outfieldPlayersSelector =
     ".fieldpos.fieldpos-ok.ui-draggable:not(.substitute):not(.goalkeeper):not(.substitute.goalkeeper), .fieldpos.fieldpos-collision.ui-draggable:not(.substitute):not(.goalkeeper):not(.substitute.goalkeeper)";
+  const goalkeeperSelector = ".fieldpos.fieldpos-ok.goalkeeper.ui-draggable";
+  const minOutfieldPlayers = 10;
+  const maxTacticNameLength = 50;
 
   window.addEventListener("load", function () {
     const tacticsSelectorDiv = createTacSelDiv();
@@ -68,14 +65,6 @@ let modal;
       );
     }
 
-    modal = createInfoModal();
-    document.body.appendChild(modal);
-    document.addEventListener("click", function (event) {
-      if (modal.style.display === "block" && !modal.contains(event.target)) {
-        modal.style.display = "none";
-      }
-    });
-
     fetchTacticsFromLocalStorage()
       .then((data) => {
         dropdownTactics = data.tactics;
@@ -95,20 +84,28 @@ let modal;
       });
   });
 
-  function createTacSelDiv() {
-    const myDiv = document.createElement("div");
-    myDiv.id = "tactics_selector_div";
-    myDiv.style.width = "100%";
-    myDiv.style.display = "flex";
-    myDiv.style.flexWrap = "wrap";
-    myDiv.style.alignItems = "center";
-    myDiv.style.justifyContent = "flex-start";
-    myDiv.style.marginTop = "6px";
-    myDiv.style.marginLeft = "6px";
-    return myDiv;
-  }
+  const modal = createInfoModal();
+  document.body.appendChild(modal);
+  document.addEventListener("click", function (event) {
+    if (modal.style.display === "block" && !modal.contains(event.target)) {
+      modal.style.display = "none";
+    }
+  });
 
   // _____Dropdown Menu_____
+
+  function createTacSelDiv() {
+    const div = document.createElement("div");
+    div.id = "tactics_selector_div";
+    div.style.width = "100%";
+    div.style.display = "flex";
+    div.style.flexWrap = "wrap";
+    div.style.alignItems = "center";
+    div.style.justifyContent = "flex-start";
+    div.style.marginTop = "6px";
+    div.style.marginLeft = "6px";
+    return div;
+  }
 
   function createDropdownMenu() {
     const dropdown = document.createElement("select");
@@ -197,7 +194,7 @@ let modal;
   }
 
   function handleTacticSelection(tactic) {
-    let outfieldPlayers = Array.from(
+    const outfieldPlayers = Array.from(
       document.querySelectorAll(outfieldPlayersSelector)
     );
 
@@ -206,7 +203,7 @@ let modal;
     );
 
     if (selectedTactic) {
-      if (outfieldPlayers.length < 10) {
+      if (outfieldPlayers.length < minOutfieldPlayers) {
         const hiButton = document.getElementById("hiButton");
         hiButton.click();
         setTimeout(() => rearrangePlayers(selectedTactic.coordinates), 1);
@@ -246,13 +243,7 @@ let modal;
 
   function createAddNewTacticButton() {
     const button = document.createElement("button");
-    button.id = "addNewTacticButton";
-    button.textContent = "Add current tactic";
-    button.style.fontFamily = "Montserrat, sans-serif";
-    button.style.fontSize = "12px";
-    button.style.color = "#000";
-    button.style.marginLeft = "6px";
-    button.style.cursor = "pointer";
+    setupButton(button, "addNewTacticButton", "Add current tactic");
 
     button.addEventListener("click", function () {
       addNewTactic().catch(console.error);
@@ -262,9 +253,9 @@ let modal;
   }
 
   async function addNewTactic() {
-    let dropdown = document.getElementById("tacticsDropdown");
+    const dropdown = document.getElementById("tacticsDropdown");
 
-    let outfieldPlayers = Array.from(
+    const outfieldPlayers = Array.from(
       document.querySelectorAll(outfieldPlayersSelector)
     );
     if (!validateTacticPlayerCount(outfieldPlayers)) {
@@ -277,12 +268,12 @@ let modal;
       return;
     }
 
-    let coordinates = outfieldPlayers.map((player) => [
+    const coordinates = outfieldPlayers.map((player) => [
       parseInt(player.style.left),
       parseInt(player.style.top),
     ]);
 
-    let tactic = {
+    const tactic = {
       name: tacticName,
       coordinates,
       id: generateUniqueId(),
@@ -295,19 +286,17 @@ let modal;
     dropdown.value = tactic.name;
     handleTacticSelection(tactic.name);
 
-    alert("A new tactic has been added.");
+    alert(`Tactic "${tactic.name}" has been added.`);
   }
 
   function validateTacticPlayerCount(outfieldPlayers) {
-    let isGoalkeeper = document.querySelector(
-      ".fieldpos.fieldpos-ok.goalkeeper.ui-draggable"
-    );
+    const isGoalkeeper = document.querySelector(goalkeeperSelector);
 
     outfieldPlayers = outfieldPlayers.filter(
       (player) => !player.classList.contains("fieldpos-collision")
     );
 
-    if (outfieldPlayers.length < 10 || !isGoalkeeper) {
+    if (outfieldPlayers.length < minOutfieldPlayers || !isGoalkeeper) {
       alert(
         "Error: invalid tactic. You must have 1 goalkeeper and 10 outfield players in valid positions."
       );
@@ -331,7 +320,7 @@ let modal;
       return false;
     }
 
-    if (name.length > 50) {
+    if (name.length > maxTacticNameLength) {
       alert("Error: tactic name must be less than 50 characters.");
       return false;
     }
@@ -349,13 +338,7 @@ let modal;
 
   function createDeleteTacticButton() {
     const button = document.createElement("button");
-    button.id = "deleteTacticButton";
-    button.textContent = "Delete tactic";
-    button.style.fontFamily = "Montserrat, sans-serif";
-    button.style.fontSize = "12px";
-    button.style.color = "#000";
-    button.style.marginLeft = "6px";
-    button.style.cursor = "pointer";
+    setupButton(button, "deleteTacticButton", "Delete tactic");
 
     button.addEventListener("click", function () {
       deleteTactic().catch(console.error);
@@ -365,8 +348,8 @@ let modal;
   }
 
   async function deleteTactic() {
-    let dropdown = document.getElementById("tacticsDropdown");
-    let selectedTactic = dropdownTactics.find(
+    const dropdown = document.getElementById("tacticsDropdown");
+    const selectedTactic = dropdownTactics.find(
       (tactic) => tactic.name === dropdown.value
     );
 
@@ -382,8 +365,6 @@ let modal;
     if (!confirmed) {
       return;
     }
-
-    alert(`Tactic "${selectedTactic.name}" was successfully deleted!`);
 
     const tacticsData = (await GM_getValue("ls_tactics")) || { tactics: [] };
     tacticsData.tactics = tacticsData.tactics.filter(
@@ -404,19 +385,15 @@ let modal;
     if (dropdown.options[0]?.disabled) {
       dropdown.selectedIndex = 0;
     }
+
+    alert(`Tactic "${selectedTactic.name}" was successfully deleted!`);
   }
 
   // _____Rename tactic_____
 
   function createRenameTacticButton() {
     const button = document.createElement("button");
-    button.id = "renameTacticButton";
-    button.textContent = "Rename tactic";
-    button.style.fontFamily = "Montserrat, sans-serif";
-    button.style.fontSize = "12px";
-    button.style.color = "#000";
-    button.style.marginLeft = "6px";
-    button.style.cursor = "pointer";
+    setupButton(button, "renameTacticButton", "Rename tactic");
 
     button.addEventListener("click", function () {
       renameTactic().catch(console.error);
@@ -426,8 +403,8 @@ let modal;
   }
 
   async function renameTactic() {
-    let dropdown = document.getElementById("tacticsDropdown");
-    let selectedTactic = dropdownTactics.find(
+    const dropdown = document.getElementById("tacticsDropdown");
+    const selectedTactic = dropdownTactics.find(
       (tactic) => tactic.name === dropdown.value
     );
 
@@ -435,6 +412,8 @@ let modal;
       alert("Error: no tactic selected.");
       return;
     }
+
+    const oldName = selectedTactic.name;
 
     const newName = prompt("Please enter a new name for this tactic: ");
     const isValidName = await validateTacticName(newName);
@@ -466,20 +445,14 @@ let modal;
     selectedOption.value = newName;
     selectedOption.textContent = newName;
 
-    alert("Tactic was successfully renamed!");
+    alert(`Tactic "${oldName}" has been renamed to "${newName}".`);
   }
 
   // _____Update tactic_____
 
   function createUpdateTacticButton() {
     const button = document.createElement("button");
-    button.id = "updateTacticButton";
-    button.textContent = "Update tactic";
-    button.style.fontFamily = "Montserrat, sans-serif";
-    button.style.fontSize = "12px";
-    button.style.color = "#000";
-    button.style.marginLeft = "6px";
-    button.style.cursor = "pointer";
+    setupButton(button, "updateTacticButton", "Update tactic");
 
     button.addEventListener("click", function () {
       updateTactic().catch(console.error);
@@ -489,12 +462,12 @@ let modal;
   }
 
   async function updateTactic() {
-    let dropdown = document.getElementById("tacticsDropdown");
-    let outfieldPlayers = Array.from(
+    const dropdown = document.getElementById("tacticsDropdown");
+    const outfieldPlayers = Array.from(
       document.querySelectorAll(outfieldPlayersSelector)
     );
 
-    let selectedTactic = dropdownTactics.find(
+    const selectedTactic = dropdownTactics.find(
       (tactic) => tactic.name === dropdown.value
     );
 
@@ -511,43 +484,37 @@ let modal;
       return;
     }
 
-    alert(
-      `Tactic "${selectedTactic.name}" coordinates were successfully updated!`
-    );
-
-    let updatedCoordinates = outfieldPlayers.map((player) => [
+    const updatedCoordinates = outfieldPlayers.map((player) => [
       parseInt(player.style.left),
       parseInt(player.style.top),
     ]);
 
     const tacticsData = (await GM_getValue("ls_tactics")) || { tactics: [] };
 
-    for (let tactic of tacticsData.tactics) {
+    for (const tactic of tacticsData.tactics) {
       if (tactic.id === selectedTactic.id) {
         tactic.coordinates = updatedCoordinates;
       }
     }
 
-    for (let tactic of dropdownTactics) {
+    for (const tactic of dropdownTactics) {
       if (tactic.id === selectedTactic.id) {
         tactic.coordinates = updatedCoordinates;
       }
     }
 
     await GM_setValue("ls_tactics", tacticsData);
+
+    alert(
+      `Tactic "${selectedTactic.name}" coordinates were successfully updated!`
+    );
   }
 
   // _____Clear tactics_____
 
   function createClearTacticsButton() {
     const button = document.createElement("button");
-    button.id = "clearButton";
-    button.textContent = "Clear tactics";
-    button.style.fontFamily = "Montserrat, sans-serif";
-    button.style.fontSize = "12px";
-    button.style.color = "#000";
-    button.style.marginLeft = "6px";
-    button.style.cursor = "pointer";
+    setupButton(button, "clearTacticsButton", "Clear tactics");
 
     button.addEventListener("click", function () {
       clearTactics().catch(console.error);
@@ -579,13 +546,7 @@ let modal;
 
   function createResetTacticsButton() {
     const button = document.createElement("button");
-    button.id = "resetButton";
-    button.textContent = "Reset tactics";
-    button.style.fontFamily = "Montserrat, sans-serif";
-    button.style.fontSize = "12px";
-    button.style.color = "#000";
-    button.style.marginLeft = "6px";
-    button.style.cursor = "pointer";
+    setupButton(button, "resetButton", "Reset tactics");
 
     button.addEventListener("click", function () {
       resetTactics().catch(console.error);
@@ -623,13 +584,7 @@ let modal;
 
   function createImportTacticsButton() {
     const button = document.createElement("button");
-    button.id = "importButton";
-    button.textContent = "Import tactics";
-    button.style.fontFamily = "Montserrat, sans-serif";
-    button.style.fontSize = "12px";
-    button.style.color = "#000";
-    button.style.marginLeft = "6px";
-    button.style.cursor = "pointer";
+    setupButton(button, "importButton", "Import tactics");
 
     button.addEventListener("click", function () {
       importTactics().catch(console.error);
@@ -640,13 +595,7 @@ let modal;
 
   function createExportTacticsButton() {
     const button = document.createElement("button");
-    button.id = "exportButton";
-    button.textContent = "Export tactics";
-    button.style.fontFamily = "Montserrat, sans-serif";
-    button.style.fontSize = "12px";
-    button.style.color = "#000";
-    button.style.marginLeft = "6px";
-    button.style.cursor = "pointer";
+    setupButton(button, "exportButton", "Export tactics");
     button.addEventListener("click", exportTactics);
     return button;
   }
@@ -711,13 +660,7 @@ let modal;
 
   function createAboutButton() {
     const button = document.createElement("button");
-    button.id = "aboutButton";
-    button.textContent = "About";
-    button.style.fontFamily = "Montserrat, sans-serif";
-    button.style.fontSize = "12px";
-    button.style.color = "#000";
-    button.style.marginLeft = "6px";
-    button.style.cursor = "pointer";
+    setupButton(button, "aboutButton", "About");
 
     button.addEventListener("click", function (event) {
       event.stopPropagation();
@@ -826,18 +769,37 @@ let modal;
 
   // _____Other_____
 
-  function appendChildren(element, children) {
+  function getFontLink() {
+    const fontLink = document.createElement("link");
+    fontLink.href =
+      "https://fonts.googleapis.com/css2?family=Montserrat&display=swap";
+    fontLink.rel = "stylesheet";
+    return fontLink;
+  }
+
+  function appendChildren(parent, children) {
     children.forEach((ch) => {
-      element.appendChild(ch);
+      parent.appendChild(ch);
     });
   }
 
-  function insertAfterElement(toBeInserted, element) {
-    element.parentNode.insertBefore(toBeInserted, element.nextSibling);
+  function insertAfterElement(something, element) {
+    element.parentNode.insertBefore(something, element.nextSibling);
+  }
+
+  function setupButton(button, id, textContent) {
+    button.id = id;
+    button.textContent = textContent;
+    button.style.fontFamily = "Montserrat, sans-serif";
+    button.style.fontSize = "12px";
+    button.style.color = "#000";
+    button.style.marginLeft = "6px";
+    button.style.cursor = "pointer";
+    button.style.boxShadow = "3px 3px 5px rgba(0, 0, 0, 0.2)";
   }
 
   function generateUniqueId() {
-    let currentDate = new Date();
+    const currentDate = new Date();
     return (
       currentDate.getFullYear() +
       "-" +
