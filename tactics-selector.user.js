@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
-// @version      4.2
+// @version      4.3
 // @description  Adds a dropdown menu with overused tactics.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
@@ -221,14 +221,24 @@ let modal;
       document.querySelectorAll(outfieldPlayersSelector)
     );
 
+    findBestPositions(outfieldPlayers, coordinates);
+
     for (let i = 0; i < outfieldPlayers.length; ++i) {
       outfieldPlayers[i].style.left = coordinates[i][0] + "px";
       outfieldPlayers[i].style.top = coordinates[i][1] + "px";
+      checkForCollision(outfieldPlayers[i]);
+    }
+  }
 
-      if (outfieldPlayers[i].classList.contains("fieldpos-collision")) {
-        outfieldPlayers[i].classList.remove("fieldpos-collision");
-        outfieldPlayers[i].classList.add("fieldpos-ok");
-      }
+  function findBestPositions(players, coordinates) {
+    players.sort((a, b) => parseInt(a.style.top) - parseInt(b.style.top));
+    coordinates.sort((a, b) => a[1] - b[1]);
+  }
+
+  function checkForCollision(player) {
+    if (player.classList.contains("fieldpos-collision")) {
+      player.classList.remove("fieldpos-collision");
+      player.classList.add("fieldpos-ok");
     }
   }
 
