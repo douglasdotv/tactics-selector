@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
-// @version      5.0
+// @version      5.1
 // @description  Adds a dropdown menu with overused tactics.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
@@ -35,6 +35,8 @@
     { code: "pt-br", name: "Português", flag: flagsDataUrl.br },
     { code: "zh", name: "中文", flag: flagsDataUrl.cn },
   ];
+
+  let activeLanguage;
 
   const strings = {
     addButton: "",
@@ -88,7 +90,7 @@
   const maxTacticNameLength = 50;
 
   (async function () {
-    const activeLanguage = localStorage.getItem("language") || "en";
+    activeLanguage = localStorage.getItem("language") || "en";
     i18next.init({
       lng: activeLanguage,
       resources: {
@@ -587,9 +589,11 @@
 
     const newId = generateUniqueId(updatedCoordinates);
 
+    const tacticsData = (await GM_getValue("ls_tactics")) || { tactics: [] };
     const validationOutcome = await validateDuplicateTacticWithUpdatedCoord(
       newId,
-      selectedTactic
+      selectedTactic,
+      tacticsData,
     );
 
     switch (validationOutcome) {
@@ -631,8 +635,7 @@
     alert(strings.updateAlert.replace("{}", selectedTactic.name));
   }
 
-  async function validateDuplicateTacticWithUpdatedCoord(newId, selectedTac) {
-    const tacticsData = (await GM_getValue("ls_tactics")) || { tactics: [] };
+  async function validateDuplicateTacticWithUpdatedCoord(newId, selectedTac, tacticsData) {
     if (newId === selectedTac.id) {
       return "unchanged";
     } else if (tacticsData.tactics.some((tac) => tac.id === newId)) {
@@ -915,7 +918,7 @@
       const option = document.createElement("option");
       option.value = lang.code;
       option.textContent = lang.name;
-      if (lang.code === savedLanguage) {
+      if (lang.code === activeLanguage) {
         option.selected = true;
       }
       dropdown.appendChild(option);
