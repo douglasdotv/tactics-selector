@@ -1097,7 +1097,7 @@
     row.style.display = "flex";
     row.style.justifyContent = "space-between";
     row.style.flexWrap = "wrap";
-    row.style.width = "70%";
+    row.style.width = "75%";
     return row;
   }
 
