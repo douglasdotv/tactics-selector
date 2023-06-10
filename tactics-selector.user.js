@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
-// @version      5.2
+// @version      5.3
 // @description  Adds a dropdown menu with overused tactics.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
@@ -105,9 +105,26 @@
         },
       })
       .then(() => {
-        const tacticsSelectorDiv = createTacSelDiv();
+        const tacticsSelectorDiv = createMainDiv();
+        const firstRow = createMainDivFirstRow();
+        const secondRow = createMainDivSecondRow();
+
         const tacticsDropdownMenuLabel = createTacticsDropdownMenuLabel();
         const tacticsDropdownMenu = createTacticsDropdownMenu();
+        const tacticsDropdownGroup = createLabelDropdownMenuGroup(
+          tacticsDropdownMenuLabel,
+          tacticsDropdownMenu
+        );
+
+        const languageDropdownMenuLabel = createLanguageDropdownMenuLabel();
+        const languageDropdownMenu = createLanguageDropdownMenu();
+        const languageDropdownGroup = createLabelDropdownMenuGroup(
+          languageDropdownMenuLabel,
+          languageDropdownMenu
+        );
+
+        appendChildren(firstRow, [tacticsDropdownGroup, languageDropdownGroup]);
+
         const addNewTacticBtn = createAddNewTacticButton();
         const deleteTacticBtn = createDeleteTacticButton();
         const renameTacticBtn = createRenameTacticButton();
@@ -117,13 +134,9 @@
         const importTacticsBtn = createImportTacticsButton();
         const exportTacticsBtn = createExportTacticsButton();
         const aboutBtn = createAboutButton();
-        const languageDropdownMenuLabel = createLanguageDropdownMenuLabel();
-        const languageDropdownMenu = createLanguageDropdownMenu();
         const hiddenTriggerBtn = createHiddenTriggerButton();
 
-        appendChildren(tacticsSelectorDiv, [
-          tacticsDropdownMenuLabel,
-          tacticsDropdownMenu,
+        appendChildren(secondRow, [
           addNewTacticBtn,
           deleteTacticBtn,
           renameTacticBtn,
@@ -133,8 +146,11 @@
           importTacticsBtn,
           exportTacticsBtn,
           aboutBtn,
-          languageDropdownMenuLabel,
-          languageDropdownMenu,
+        ]);
+
+        appendChildren(tacticsSelectorDiv, [
+          firstRow,
+          secondRow,
           hiddenTriggerBtn,
         ]);
 
@@ -182,12 +198,6 @@
   });
 
   // _____Tactics Dropdown Menu_____
-
-  function createTacSelDiv() {
-    const div = document.createElement("div");
-    setupTacticsSelectorDiv(div);
-    return div;
-  }
 
   function createTacticsDropdownMenu() {
     const dropdown = document.createElement("select");
@@ -975,14 +985,22 @@
       strings[key] = i18next.t(key);
     }
 
-    document.getElementById("add_tactic_button").textContent = strings.addButton;
-    document.getElementById("delete_tactic_button").textContent = strings.deleteButton;
-    document.getElementById("rename_tactic_button").textContent = strings.renameButton;
-    document.getElementById("update_tactic_button").textContent = strings.updateButton;
-    document.getElementById("clear_tactics_button").textContent = strings.clearButton;
-    document.getElementById("reset_tactics_button").textContent = strings.resetButton;
-    document.getElementById("import_tactics_button").textContent = strings.importButton;
-    document.getElementById("export_tactics_button").textContent = strings.exportButton;
+    document.getElementById("add_tactic_button").textContent =
+      strings.addButton;
+    document.getElementById("delete_tactic_button").textContent =
+      strings.deleteButton;
+    document.getElementById("rename_tactic_button").textContent =
+      strings.renameButton;
+    document.getElementById("update_tactic_button").textContent =
+      strings.updateButton;
+    document.getElementById("clear_tactics_button").textContent =
+      strings.clearButton;
+    document.getElementById("reset_tactics_button").textContent =
+      strings.resetButton;
+    document.getElementById("import_tactics_button").textContent =
+      strings.importButton;
+    document.getElementById("export_tactics_button").textContent =
+      strings.exportButton;
     document.getElementById("about_button").textContent = strings.aboutButton;
     document.getElementById("info_modal_info_text").innerHTML =
       strings.modalContentInfoText;
@@ -1018,15 +1036,47 @@
     element.parentNode.insertBefore(something, element.nextSibling);
   }
 
-  function setupTacticsSelectorDiv(div) {
+  function createMainDiv() {
+    const div = document.createElement("div");
+    setupMainDiv(div);
+    return div;
+  }
+
+  function setupMainDiv(div) {
     div.id = "tactics_selector_div";
     div.style.width = "100%";
     div.style.display = "flex";
-    div.style.flexWrap = "wrap";
-    div.style.alignItems = "center";
-    div.style.justifyContent = "flex-start";
+    div.style.flexDirection = "column";
+    div.style.alignItems = "stretch";
     div.style.marginTop = "6px";
     div.style.marginLeft = "6px";
+  }
+
+  function createMainDivFirstRow() {
+    const row = document.createElement("div");
+    row.id = "tactics_selector_div_first_row";
+    row.style.display = "flex";
+    row.style.justifyContent = "space-between";
+    row.style.flexWrap = "wrap";
+    row.style.width = "70%";
+    return row;
+  }
+
+  function createMainDivSecondRow() {
+    const row = document.createElement("div");
+    row.id = "tactics_selector_div_second_row";
+    row.style.display = "flex";
+    row.style.justifyContent = "flex-start";
+    row.style.flexWrap = "wrap";
+    return row;
+  }
+
+  function createLabelDropdownMenuGroup(label, dropdown) {
+    const group = document.createElement("div");
+    group.style.display = "flex";
+    group.appendChild(label);
+    group.appendChild(dropdown);
+    return group;
   }
 
   function setupDropdownMenu(dropdown, id) {
@@ -1040,7 +1090,7 @@
     dropdown.style.boxShadow = "3px 3px 5px rgba(0, 0, 0, 0.2)";
     dropdown.style.cursor = "pointer";
     dropdown.style.outline = "none";
-    dropdown.style.margin = "6px";
+    dropdown.style.margin = "6px 48px 6px 6px";
   }
 
   function setupDropdownMenuLabel(description, id, textContent) {
@@ -1049,7 +1099,7 @@
     description.style.fontFamily = "Montserrat, sans-serif";
     description.style.fontSize = "12px";
     description.style.color = "#000";
-    description.style.marginLeft = "6px";
+    description.style.margin = "6px 0 6px 6px";
   }
 
   function setupButton(button, id, textContent) {
@@ -1059,6 +1109,7 @@
     button.style.fontSize = "12px";
     button.style.color = "#000";
     button.style.marginLeft = "6px";
+    button.style.marginTop = "6px";
     button.style.cursor = "pointer";
     button.style.boxShadow = "3px 3px 5px rgba(0, 0, 0, 0.2)";
   }
