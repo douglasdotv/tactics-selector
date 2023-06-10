@@ -340,7 +340,7 @@
 
   function createAddNewTacticButton() {
     const button = document.createElement("button");
-    setupButton(button, "add_button", strings.addButton);
+    setupButton(button, "add_tactic_button", strings.addButton);
 
     button.addEventListener("click", function () {
       addNewTactic().catch(console.error);
@@ -446,7 +446,7 @@
 
   function createDeleteTacticButton() {
     const button = document.createElement("button");
-    setupButton(button, "delete_button", strings.deleteButton);
+    setupButton(button, "delete_tactic_button", strings.deleteButton);
 
     button.addEventListener("click", function () {
       deleteTactic().catch(console.error);
@@ -504,7 +504,7 @@
 
   function createRenameTacticButton() {
     const button = document.createElement("button");
-    setupButton(button, "rename_button", strings.renameButton);
+    setupButton(button, "rename_tactic_button", strings.renameButton);
 
     button.addEventListener("click", function () {
       renameTactic().catch(console.error);
@@ -567,7 +567,7 @@
 
   function createUpdateTacticButton() {
     const button = document.createElement("button");
-    setupButton(button, "update_button", strings.updateButton);
+    setupButton(button, "update_tactic_button", strings.updateButton);
 
     button.addEventListener("click", function () {
       updateTactic().catch(console.error);
@@ -665,7 +665,7 @@
 
   function createClearTacticsButton() {
     const button = document.createElement("button");
-    setupButton(button, "clear_button", strings.clearButton);
+    setupButton(button, "clear_tactics_button", strings.clearButton);
 
     button.addEventListener("click", function () {
       clearTactics().catch(console.error);
@@ -697,7 +697,7 @@
 
   function createResetTacticsButton() {
     const button = document.createElement("button");
-    setupButton(button, "reset_button", strings.resetButton);
+    setupButton(button, "reset_tactics_button", strings.resetButton);
 
     button.addEventListener("click", function () {
       resetTactics().catch(console.error);
@@ -735,7 +735,7 @@
 
   function createImportTacticsButton() {
     const button = document.createElement("button");
-    setupButton(button, "import_button", strings.importButton);
+    setupButton(button, "import_tactics_button", strings.importButton);
 
     button.addEventListener("click", function () {
       importTactics().catch(console.error);
@@ -746,7 +746,7 @@
 
   function createExportTacticsButton() {
     const button = document.createElement("button");
-    setupButton(button, "export_button", strings.exportButton);
+    setupButton(button, "export_tactics_button", strings.exportButton);
     button.addEventListener("click", exportTactics);
     return button;
   }
@@ -975,25 +975,23 @@
       strings[key] = i18next.t(key);
     }
 
-    document.getElementById("tactics_dropdown_menu_label").textContent =
-      strings.tacticsDropdownMenuLabel;
-    document.getElementById("language_dropdown_menu_label").textContent =
-      strings.languageDropdownMenuLabel;
-
-    document.getElementById("add_button").textContent = strings.addButton;
-    document.getElementById("delete_button").textContent = strings.deleteButton;
-    document.getElementById("rename_button").textContent = strings.renameButton;
-    document.getElementById("update_button").textContent = strings.updateButton;
-    document.getElementById("clear_button").textContent = strings.clearButton;
-    document.getElementById("reset_button").textContent = strings.resetButton;
-    document.getElementById("import_button").textContent = strings.importButton;
-    document.getElementById("export_button").textContent = strings.exportButton;
+    document.getElementById("add_tactic_button").textContent = strings.addButton;
+    document.getElementById("delete_tactic_button").textContent = strings.deleteButton;
+    document.getElementById("rename_tactic_button").textContent = strings.renameButton;
+    document.getElementById("update_tactic_button").textContent = strings.updateButton;
+    document.getElementById("clear_tactics_button").textContent = strings.clearButton;
+    document.getElementById("reset_tactics_button").textContent = strings.resetButton;
+    document.getElementById("import_tactics_button").textContent = strings.importButton;
+    document.getElementById("export_tactics_button").textContent = strings.exportButton;
     document.getElementById("about_button").textContent = strings.aboutButton;
-
     document.getElementById("info_modal_info_text").innerHTML =
       strings.modalContentInfoText;
     document.getElementById("info_modal_feedback_text").innerHTML =
       strings.modalContentFeedbackText;
+    document.getElementById("tactics_dropdown_menu_label").textContent =
+      strings.tacticsDropdownMenuLabel;
+    document.getElementById("language_dropdown_menu_label").textContent =
+      strings.languageDropdownMenuLabel;
   }
 
   // _____Other_____
