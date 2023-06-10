@@ -54,7 +54,7 @@
     { code: "es", name: "Español", flag: flagsDataUrl.ar },
     { code: "pl", name: "Polski", flag: flagsDataUrl.pl },
     { code: "nl", name: "Nederlands", flag: flagsDataUrl.nl },
-    { code: "id", name: "Bahasa Indonesia", flag: flagsDataUrl.in },
+    { code: "id", name: "Bahasa Indonesia", flag: flagsDataUrl.id },
     { code: "de", name: "Deutsch", flag: flagsDataUrl.de },
     { code: "it", name: "Italiano", flag: flagsDataUrl.it },
     { code: "fr", name: "Français", flag: flagsDataUrl.fr },
