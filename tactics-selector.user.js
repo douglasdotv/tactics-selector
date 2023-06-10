@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
-// @version      4.7
+// @version      4.8
 // @description  Adds a dropdown menu with overused tactics.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
@@ -31,6 +31,11 @@
     ".fieldpos.fieldpos-ok.ui-draggable:not(.substitute):not(.goalkeeper):not(.substitute.goalkeeper), .fieldpos.fieldpos-collision.ui-draggable:not(.substitute):not(.goalkeeper):not(.substitute.goalkeeper)";
 
   const goalkeeperSelector = ".fieldpos.fieldpos-ok.goalkeeper.ui-draggable";
+
+  const formationTextSelector = "#formation_text";
+
+  const tacticSlotSelector =
+    ".ui-state-default.ui-corner-top.ui-tabs-selected.ui-state-active.invalid";
 
   const minOutfieldPlayers = 10;
 
@@ -199,8 +204,10 @@
     for (let i = 0; i < outfieldPlayers.length; ++i) {
       outfieldPlayers[i].style.left = coordinates[i][0] + "px";
       outfieldPlayers[i].style.top = coordinates[i][1] + "px";
-      checkForCollision(outfieldPlayers[i]);
+      removeCollision(outfieldPlayers[i]);
     }
+
+    removeTacticSlotInvalidStatus();
 
     updateFormationText(getFormation(coordinates));
   }
@@ -210,11 +217,28 @@
     coordinates.sort((a, b) => a[1] - b[1]);
   }
 
-  function checkForCollision(player) {
+  function removeCollision(player) {
     if (player.classList.contains("fieldpos-collision")) {
       player.classList.remove("fieldpos-collision");
       player.classList.add("fieldpos-ok");
     }
+  }
+
+  function removeTacticSlotInvalidStatus() {
+    const slot = document.querySelector(tacticSlotSelector);
+    if (slot) {
+      slot.classList.remove("invalid");
+    }
+  }
+
+  function updateFormationText(formation) {
+    const formationTextElement = document.querySelector(formationTextSelector);
+    formationTextElement.querySelector(".defs").textContent =
+      formation.defenders;
+    formationTextElement.querySelector(".mids").textContent =
+      formation.midfielders;
+    formationTextElement.querySelector(".atts").textContent =
+      formation.strikers;
   }
 
   function getFormation(coordinates) {
@@ -234,16 +258,6 @@
     }
 
     return { strikers, midfielders, defenders };
-  }
-
-  function updateFormationText(formation) {
-    const formationTextElement = document.querySelector("#formation_text");
-    formationTextElement.querySelector(".defs").textContent =
-      formation.defenders;
-    formationTextElement.querySelector(".mids").textContent =
-      formation.midfielders;
-    formationTextElement.querySelector(".atts").textContent =
-      formation.strikers;
   }
 
   // _____Add new tactic_____
@@ -325,7 +339,6 @@
     const tacticsData = (await GM_getValue("ls_tactics")) || { tactics: [] };
     return tacticsData.tactics.some((tactic) => tactic.id === id);
   }
-
 
   async function validateTacticName(name) {
     if (!name) {
@@ -484,6 +497,7 @@
 
   async function updateTactic() {
     const tacticsDropdown = document.getElementById("tactics_dropdown");
+
     const outfieldPlayers = Array.from(
       document.querySelectorAll(outfieldPlayersSelector)
     );
