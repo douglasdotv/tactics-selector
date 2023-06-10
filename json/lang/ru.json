@@ -24,7 +24,7 @@
   "alreadyExistingTacticNameError": "Ошибка: тактика с этим именем уже существует.",
   "tacticNameMaxLengthError": "Ошибка: имя тактики должно быть меньше 50 символов.",
   "noTacticSelectedError": "Ошибка: тактика не выбрана.",
-  "alreadyExistingTacticIdError": "Ошибка: тактика с такими же координатами уже существует.",
+  "duplicateTacticError": "Ошибка: тактика с такими же координатами уже существует.",
   "modalContentInfoText": "Для получения дополнительной информации нажмите <a href=\"https://greasyfork.org/pt-BR/scripts/467712-mz-tactics-selector\" style=\"color: #007BFF;\">здесь</a>.",
   "modalContentFeedbackText": "Если у вас возникнут проблемы или у вас есть предложения, не стесняйтесь связаться со мной здесь: <a href=\"https://www.managerzone.com/?p=guestbook&uid=8577497\"><img src=\"https://www.managerzone.com/img/soccer/reply_guestbook.gif\"></a>",
   "tacticsDropdownMenuLabel": "Выберите тактику: ",

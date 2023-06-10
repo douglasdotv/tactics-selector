@@ -24,7 +24,7 @@
   "alreadyExistingTacticNameError": "오류: 이 이름의 전략이 이미 존재합니다.",
   "tacticNameMaxLengthError": "오류: 전략 이름은 50자를 초과할 수 없습니다.",
   "noTacticSelectedError": "오류: 선택된 전략이 없습니다.",
-  "alreadyExistingTacticIdError": "오류: 같은 좌표를 가진 전략이 이미 존재합니다.",
+  "duplicateTacticError": "오류: 같은 좌표를 가진 전략이 이미 존재합니다.",
   "modalContentInfoText": "더 많은 정보를 위해, <a href=\"https://greasyfork.org/pt-BR/scripts/467712-mz-tactics-selector\" style=\"color: #007BFF;\">여기</a>를 클릭하세요.",
   "modalContentFeedbackText": "문제가 발생하거나 제안사항이 있으시면, 여기로 연락하실 수 있습니다: <a href=\"https://www.managerzone.com/?p=guestbook&uid=8577497\"><img src=\"https://www.managerzone.com/img/soccer/reply_guestbook.gif\"></a>",
   "tacticsDropdownMenuLabel": "전략 선택: ",

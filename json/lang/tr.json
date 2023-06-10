@@ -24,7 +24,7 @@
   "alreadyExistingTacticNameError": "Hata: Bu isimde bir taktik zaten mevcut.",
   "tacticNameMaxLengthError": "Hata: Taktik adı 50 karakterden kısa olmalıdır.",
   "noTacticSelectedError": "Hata: Hiçbir taktik seçilmedi.",
-  "alreadyExistingTacticIdError": "Hata: Aynı koordinatlara sahip bir taktik zaten mevcut.",
+  "duplicateTacticError": "Hata: Aynı koordinatlara sahip bir taktik zaten mevcut.",
   "modalContentInfoText": "Daha fazla bilgi için <a href=\"https://greasyfork.org/pt-BR/scripts/467712-mz-tactics-selector\" style=\"color: #007BFF;\">buraya</a> tıklayın.",
   "modalContentFeedbackText": "Herhangi bir sorunla karşılaşırsanız veya önerileriniz varsa, lütfen buradan benimle iletişime geçin: <a href=\"https://www.managerzone.com/?p=guestbook&uid=8577497\"><img src=\"https://www.managerzone.com/img/soccer/reply_guestbook.gif\"></a>",
   "tacticsDropdownMenuLabel": "Bir taktik seçin: ",

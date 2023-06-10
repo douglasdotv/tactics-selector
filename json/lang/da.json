@@ -24,7 +24,7 @@
   "alreadyExistingTacticNameError": "Fejl: En taktik med dette navn findes allerede.",
   "tacticNameMaxLengthError": "Fejl: Taktiknavnet skal være på under 50 tegn.",
   "noTacticSelectedError": "Fejl: Ingen taktik valgt.",
-  "alreadyExistingTacticIdError": "Fejl: En taktik med præcis de samme koordinater findes allerede.",
+  "duplicateTacticError": "Fejl: En taktik med præcis de samme koordinater findes allerede.",
   "modalContentInfoText": "For mere information, klik <a href=\"https://greasyfork.org/pt-BR/scripts/467712-mz-tactics-selector\" style=\"color: #007BFF;\">her</a>.",
   "modalContentFeedbackText": "Hvis du oplever problemer eller har forslag, er du velkommen til at kontakte mig her: <a href=\"https://www.managerzone.com/?p=guestbook&uid=8577497\"><img src=\"https://www.managerzone.com/img/soccer/reply_guestbook.gif\"></a>",
   "tacticsDropdownMenuLabel": "Vælg en taktik: ",

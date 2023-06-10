@@ -24,7 +24,7 @@
   "alreadyExistingTacticNameError": "خطأ: يوجد بالفعل خطة بهذا الاسم.",
   "tacticNameMaxLengthError": "خطأ: يجب أن يكون اسم الخطة أقل من 50 حرفا.",
   "noTacticSelectedError": "خطأ: لم يتم اختيار أي خطة.",
-  "alreadyExistingTacticIdError": "خطأ: يوجد بالفعل خطة بها نفس الإحداثيات.",
+  "duplicateTacticError": "خطأ: يوجد بالفعل خطة بها نفس الإحداثيات.",
   "modalContentInfoText": "لمزيد من المعلومات، انقر <a href=\"https://greasyfork.org/pt-BR/scripts/467712-mz-tactics-selector\" style=\"color: #007BFF;\">هنا</a>.",
   "modalContentFeedbackText": "إذا واجهتك أي مشاكل أو لديك أي اقتراحات، فلا تتردد في الاتصال بي هنا: <a href=\"https://www.managerzone.com/?p=guestbook&uid=8577497\"><img src=\"https://www.managerzone.com/img/soccer/reply_guestbook.gif\"></a>",
   "tacticsDropdownMenuLabel": "اختر خطة: ",

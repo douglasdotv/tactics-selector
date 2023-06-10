@@ -24,7 +24,7 @@
   "alreadyExistingTacticNameError": "Error: Taktik dengan nama ini sudah ada.",
   "tacticNameMaxLengthError": "Error: Nama taktik harus kurang dari 50 karakter.",
   "noTacticSelectedError": "Error: Tidak ada taktik yang dipilih.",
-  "alreadyExistingTacticIdError": "Error: Taktik dengan koordinat yang sama sudah ada.",
+  "duplicateTacticError": "Error: Taktik dengan koordinat yang sama sudah ada.",
   "modalContentInfoText": "Untuk informasi lebih lanjut, klik <a href=\"https://greasyfork.org/pt-BR/scripts/467712-mz-tactics-selector\" style=\"color: #007BFF;\">di sini</a>.",
   "modalContentFeedbackText": "Jika Anda mengalami masalah atau memiliki saran, jangan ragu untuk menghubungi saya di sini: <a href=\"https://www.managerzone.com/?p=guestbook&uid=8577497\"><img src=\"https://www.managerzone.com/img/soccer/reply_guestbook.gif\"></a>",
   "tacticsDropdownMenuLabel": "Pilih taktik: ",

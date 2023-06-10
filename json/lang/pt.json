@@ -26,7 +26,7 @@
   "noTacticSelectedError": "Erro: tática não selecionada.",
   "duplicateTacticError": "Erro: uma tática com essas coordenadas já existe.",
   "modalContentInfoText": "Para mais informações, clique <a href=\"https://greasyfork.org/pt-BR/scripts/467712-mz-tactics-selector\" style=\"color: #007BFF;\">aqui</a>.",
-  "modalContentFeedbackText": "Se tiver quaisquer problemas ou sugestões, sinta-se à vontade para entrar em contato comigo: <a href=\"https://www.managerzone.com/?p=guestbook&uid=8577497\"><img src=\"https://www.managerzone.com/img/soccer/reply_guestbook.gif\"></a>",
+  "modalContentFeedbackText": "Se tiver quaisquer problemas ou sugestões, pode entrar em contato comigo aqui: <a href=\"https://www.managerzone.com/?p=guestbook&uid=8577497\"><img src=\"https://www.managerzone.com/img/soccer/reply_guestbook.gif\"></a>",
   "tacticsDropdownMenuLabel": "Selecione uma tática: ",
   "languageDropdownMenuLabel": "Idioma: "
 }
