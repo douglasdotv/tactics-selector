@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
-// @version      5.3
+// @version      5.4
 // @description  Adds a dropdown menu with overused tactics.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
@@ -130,6 +130,8 @@
           languageDropdownMenuLabel,
           languageDropdownMenu
         );
+        const flagImage = createFlagImage();
+        languageDropdownGroup.appendChild(flagImage);
 
         appendChildren(firstRow, [tacticsDropdownGroup, languageDropdownGroup]);
 
@@ -979,10 +981,19 @@
     try {
       const translationDataUrl = `https://raw.githubusercontent.com/douglasdotv/tactics-selector/main/json/lang/${languageCode}.json?callback=?`;
       const translations = await (await fetch(translationDataUrl)).json();
+
       i18next.changeLanguage(languageCode);
       i18next.addResourceBundle(languageCode, "translation", translations);
+
       localStorage.setItem("language", languageCode);
+
       updateTranslation();
+
+      const language = languages.find((lang) => lang.code === languageCode);
+      if (language) {
+        const flagImage = document.getElementById("language_flag");
+        flagImage.src = language.flag;
+      }
     } catch (err) {
       console.error(err);
     }
@@ -1098,7 +1109,7 @@
     dropdown.style.boxShadow = "3px 3px 5px rgba(0, 0, 0, 0.2)";
     dropdown.style.cursor = "pointer";
     dropdown.style.outline = "none";
-    dropdown.style.margin = "6px 48px 6px 6px";
+    dropdown.style.margin = "6px 0 6px 6px";
   }
 
   function setupDropdownMenuLabel(description, id, textContent) {
@@ -1129,6 +1140,19 @@
     placeholderOption.disabled = true;
     placeholderOption.selected = true;
     return placeholderOption;
+  }
+
+  function createFlagImage() {
+    const img = document.createElement("img");
+    img.id = "language_flag";
+    img.style.height = "15px";
+    img.style.width = "25px";
+    img.style.margin = "9px 0 6px 6px";
+    const activeLang = languages.find((lang) => lang.code === activeLanguage);
+    if (activeLang) {
+      img.src = activeLang.flag;
+    }
+    return img;
   }
 
   function generateUniqueId(coordinates) {
