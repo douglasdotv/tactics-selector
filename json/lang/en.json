@@ -27,6 +27,6 @@
   "alreadyExistingTacticIdError": "Error: a tactic with the exact same coordinates already exists.",
   "modalContentInfoText": "For more info, click <a href=\"https://greasyfork.org/pt-BR/scripts/467712-mz-tactics-selector\" style=\"color: #007BFF;\">here</a>.",
   "modalContentFeedbackText": "If you run into any issues or have any suggestions, you can contact me here: <a href=\"https://www.managerzone.com/?p=guestbook&uid=8577497\"><img src=\"https://www.managerzone.com/img/soccer/reply_guestbook.gif\"></a>",
-  "tacticsDropdownLabel": "Select a tactic: ",
-  "languageDropdownLabel": "Language: "
+  "tacticsDropdownMenuLabel": "Select a tactic: ",
+  "languageDropdownMenuLabel": "Language: "
 }
