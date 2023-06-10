@@ -160,17 +160,6 @@
             console.error("Couldn't fetch data from json: ", err);
           });
 
-        const infoModal = createInfoModal();
-        document.body.appendChild(infoModal);
-        document.addEventListener("click", function (event) {
-          if (
-            infoModal.style.display === "block" &&
-            !infoModal.contains(event.target)
-          ) {
-            infoModal.style.display = "none";
-          }
-        });
-
         updateTranslation();
       });
   }
@@ -179,6 +168,17 @@
     initialize().catch((err) => {
       console.error("Init error: ", err);
     });
+  });
+
+  const infoModal = createInfoModal();
+  document.body.appendChild(infoModal);
+  document.addEventListener("click", function (event) {
+    if (
+      infoModal.style.display === "block" &&
+      !infoModal.contains(event.target)
+    ) {
+      infoModal.style.display = "none";
+    }
   });
 
   // _____Tactics Dropdown Menu_____
