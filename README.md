@@ -1,6 +1,6 @@
 # MZ Tactics Selector UserScript
 
-![MZ Tactics Selector Screenshot](https://s1.ax1x.com/2023/06/07/pCFsB1P.png)
+![MZ Tactics Selector Screenshot](https://s1.ax1x.com/2023/06/11/pCVaPVH.png)
 
 This is a UserScript designed specifically for the game [ManagerZone](https://www.managerzone.com/). It enhances user experience by introducing a dropdown menu on the tactics page, enabling one to select from a pre-defined list of tactics.
 
