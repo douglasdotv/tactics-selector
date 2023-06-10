@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
-// @version      4.8
+// @version      4.9
 // @description  Adds a dropdown menu with overused tactics.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
@@ -496,13 +496,11 @@
   }
 
   async function updateTactic() {
-    const tacticsDropdown = document.getElementById("tactics_dropdown");
-
     const outfieldPlayers = Array.from(
       document.querySelectorAll(outfieldPlayersSelector)
     );
 
-    const tacticsDropdown = document.getElementById("tactics_dropdown_menu");
+    const tacticsDropdown = document.getElementById("tactics_dropdown");
 
     const selectedTactic = dropdownTactics.find(
       (tactic) => tactic.name === tacticsDropdown.value
@@ -513,28 +511,37 @@
       return;
     }
 
-    const confirmed = confirm(
-      `Are you sure you want to update "${selectedTactic.name}" coordinates?`
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
     const updatedCoordinates = outfieldPlayers.map((player) => [
       parseInt(player.style.left),
       parseInt(player.style.top),
     ]);
 
-    const tacticsData = (await GM_getValue("ls_tactics")) || { tactics: [] };
-
     const newId = generateUniqueId(updatedCoordinates);
-    if (
-      tacticsData.tactics.some(
-        (tactic) => tactic.id === newId && tactic.id !== selectedTactic.id
-      )
-    ) {
-      alert("A tactic with these coordinates already exists.");
+
+    const validationOutcome = await validateDuplicateTacticWithUpdatedCoord(
+      newId,
+      selectedTactic
+    );
+
+    switch (validationOutcome) {
+      case "unchanged":
+        return;
+      case "duplicate":
+        alert(
+          "Error: a tactic with the exact same coordinates already exists."
+        );
+        return;
+      case "unique":
+        break;
+      default:
+        return;
+    }
+
+    const confirmed = confirm(
+      `Are you sure you want to update "${selectedTactic.name}" coordinates?`
+    );
+
+    if (!confirmed) {
       return;
     }
 
@@ -557,6 +564,17 @@
     alert(
       `Tactic "${selectedTactic.name}" coordinates were successfully updated!`
     );
+  }
+
+  async function validateDuplicateTacticWithUpdatedCoord(newId, selectedTac) {
+    const tacticsData = (await GM_getValue("ls_tactics")) || { tactics: [] };
+    if (newId === selectedTac.id) {
+      return "unchanged";
+    } else if (tacticsData.tactics.some((tac) => tac.id === newId)) {
+      return "duplicate";
+    } else {
+      return "unique";
+    }
   }
 
   // _____Clear tactics_____
