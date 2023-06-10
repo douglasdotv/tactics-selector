@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
-// @version      5.4
+// @version      5.5
 // @description  Adds a dropdown menu with overused tactics.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
@@ -28,20 +28,40 @@
     gb: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/gb.svg",
     br: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/br.svg",
     cn: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/cn.svg",
-    no: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/no.svg",
     se: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/se.svg",
+    no: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/no.svg",
+    dk: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/dk.svg",
     ar: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/ar.svg",
     pl: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/pl.svg",
+    nl: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/nl.svg",
+    id: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/id.svg",
+    de: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/de.svg",
+    it: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/it.svg",
+    fr: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/fr.svg",
+    tr: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/tr.svg",
+    kr: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/kr.svg",
+    ru: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/ru.svg",
+    sa: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/sa.svg",
   };
 
   const languages = [
     { code: "en", name: "English", flag: flagsDataUrl.gb },
     { code: "pt", name: "Português", flag: flagsDataUrl.br },
     { code: "zh", name: "中文", flag: flagsDataUrl.cn },
-    { code: "no", name: "Norsk", flag: flagsDataUrl.no },
     { code: "sv", name: "Svenska", flag: flagsDataUrl.se },
+    { code: "no", name: "Norsk", flag: flagsDataUrl.no },
+    { code: "da", name: "Dansk", flag: flagsDataUrl.dk },
     { code: "es", name: "Español", flag: flagsDataUrl.ar },
     { code: "pl", name: "Polski", flag: flagsDataUrl.pl },
+    { code: "nl", name: "Nederlands", flag: flagsDataUrl.nl },
+    { code: "id", name: "Bahasa Indonesia", flag: flagsDataUrl.in },
+    { code: "de", name: "Deutsch", flag: flagsDataUrl.de },
+    { code: "it", name: "Italiano", flag: flagsDataUrl.it },
+    { code: "fr", name: "Français", flag: flagsDataUrl.fr },
+    { code: "tr", name: "Türkçe", flag: flagsDataUrl.tr },
+    { code: "ko", name: "한국어", flag: flagsDataUrl.kr },
+    { code: "ru", name: "Русский", flag: flagsDataUrl.ru },
+    { code: "ar", name: "العربية", flag: flagsDataUrl.sa },
   ];
 
   let activeLanguage;
