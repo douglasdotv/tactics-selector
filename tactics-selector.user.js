@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
-// @version      4.9
+// @version      5.0
 // @description  Adds a dropdown menu with overused tactics.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
@@ -10,6 +10,7 @@
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @require      https://unpkg.com/jssha@3.3.0/dist/sha256.js
+// @require      https://unpkg.com/i18next@21.6.3/i18next.min.js
 // @license      MIT
 // ==/UserScript==
 
@@ -22,6 +23,51 @@
 
   const defaultTacticsDataUrl =
     "https://raw.githubusercontent.com/douglasdotv/tactics-selector/main/json/tactics.json?callback=?";
+
+  const flagsDataUrl = {
+    gb: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/gb.svg",
+    br: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/br.svg",
+    cn: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/cn.svg",
+  };
+
+  const languages = [
+    { code: "en", name: "English", flag: flagsDataUrl.gb },
+    { code: "pt-br", name: "Português", flag: flagsDataUrl.br },
+    { code: "zh", name: "中文", flag: flagsDataUrl.cn },
+  ];
+
+  const strings = {
+    addButton: "",
+    deleteButton: "",
+    renameButton: "",
+    updateButton: "",
+    aboutButton: "",
+    clearButton: "",
+    resetButton: "",
+    importButton: "",
+    exportButton: "",
+    tacticNamePrompt: "",
+    addAlert: "",
+    deleteAlert: "",
+    renameAlert: "",
+    updateAlert: "",
+    clearAlert: "",
+    resetAlert: "",
+    deleteConfirmation: "",
+    updateConfirmation: "",
+    clearConfirmation: "",
+    resetConfirmation: "",
+    invalidTacticError: "",
+    noTacticNameProvidedError: "",
+    alreadyExistingTacticNameError: "",
+    tacticNameLengthError: "",
+    noTacticSelectedError: "",
+    duplicateTacticError: "",
+    modalContentInfoText: "",
+    modalContentFeedbackText: "",
+    tacticsDropdownMenuLabel: "",
+    languageDropdownMenuLabel: "",
+  };
 
   const tacticsBox = document.getElementById("tactics_box");
 
@@ -41,58 +87,74 @@
 
   const maxTacticNameLength = 50;
 
-  window.addEventListener("load", function () {
-    const tacticsSelectorDiv = createTacSelDiv();
-    const dropdown = createDropdownMenu();
-    const dropdownDescription = createDropdownDescription();
-    const addNewTacticBtn = createAddNewTacticButton();
-    const deleteTacticBtn = createDeleteTacticButton();
-    const renameTacticBtn = createRenameTacticButton();
-    const updateTacticBtn = createUpdateTacticButton();
-    const clearTacticsBtn = createClearTacticsButton();
-    const resetTacticsBtn = createResetTacticsButton();
-    const importTacticsBtn = createImportTacticsButton();
-    const exportTacticsBtn = createExportTacticsButton();
-    const aboutBtn = createAboutButton();
-    const hiddenTriggerBtn = createHiddenTriggerButton();
+  (async function () {
+    const activeLanguage = localStorage.getItem("language") || "en";
+    i18next.init({
+      lng: activeLanguage,
+      resources: {
+        [activeLanguage]: {
+          translation: await (
+            await fetch(
+              `https://raw.githubusercontent.com/douglasdotv/tactics-selector/main/json/lang/${activeLanguage}.json?callback=?`
+            )
+          ).json(),
+        },
+      },
+    });
 
-    appendChildren(tacticsSelectorDiv, [
-      dropdownDescription,
-      dropdown,
-      addNewTacticBtn,
-      deleteTacticBtn,
-      renameTacticBtn,
-      updateTacticBtn,
-      clearTacticsBtn,
-      resetTacticsBtn,
-      importTacticsBtn,
-      exportTacticsBtn,
-      aboutBtn,
-      hiddenTriggerBtn,
-    ]);
+    window.addEventListener("load", function () {
+      const tacticsSelectorDiv = createTacSelDiv();
+      const tacticsDropdownMenu = createTacticsDropdownMenu();
+      const addNewTacticBtn = createAddNewTacticButton();
+      const deleteTacticBtn = createDeleteTacticButton();
+      const renameTacticBtn = createRenameTacticButton();
+      const updateTacticBtn = createUpdateTacticButton();
+      const clearTacticsBtn = createClearTacticsButton();
+      const resetTacticsBtn = createResetTacticsButton();
+      const importTacticsBtn = createImportTacticsButton();
+      const exportTacticsBtn = createExportTacticsButton();
+      const aboutBtn = createAboutButton();
+      const languageDropdownMenu = createLanguageDropdownMenu();
+      const hiddenTriggerBtn = createHiddenTriggerButton();
 
-    if (isSoccerTacticsPage()) {
-      insertAfterElement(tacticsSelectorDiv, tacticsBox);
-    }
+      appendChildren(tacticsSelectorDiv, [
+        tacticsDropdownMenu,
+        addNewTacticBtn,
+        deleteTacticBtn,
+        renameTacticBtn,
+        updateTacticBtn,
+        clearTacticsBtn,
+        resetTacticsBtn,
+        importTacticsBtn,
+        exportTacticsBtn,
+        aboutBtn,
+        languageDropdownMenu,
+        hiddenTriggerBtn,
+      ]);
 
-    fetchTacticsFromLocalStorage()
-      .then((data) => {
-        dropdownTactics = data.tactics;
+      if (isSoccerTacticsPage()) {
+        insertAfterElement(tacticsSelectorDiv, tacticsBox);
+      }
 
-        dropdownTactics.sort((a, b) => {
-          return a.name.localeCompare(b.name);
+      fetchTacticsFromLocalStorage()
+        .then((data) => {
+          dropdownTactics = data.tactics;
+
+          dropdownTactics.sort((a, b) => {
+            return a.name.localeCompare(b.name);
+          });
+
+          addTacticsToDropdown(tacticsDropdownMenu, dropdownTactics);
+
+          tacticsDropdownMenu.addEventListener("change", function () {
+            handleTacticSelection(this.value);
+          });
+        })
+        .catch((err) => {
+          console.error("Couldn't fetch data from json: ", err);
         });
-
-        addTacticsToDropdown(dropdown, dropdownTactics);
-
-        dropdown.addEventListener("change", function () {
-          handleTacticSelection(this.value);
-        });
-      })
-      .catch((err) => {
-        console.error("Couldn't fetch data from json: ", err);
-      });
-  });
+    });
+  })();
 
   const infoModal = createInfoModal();
   document.body.appendChild(infoModal);
@@ -105,28 +167,29 @@
     }
   });
 
-  // _____Dropdown Menu_____
+  // _____Tactics Dropdown Menu_____
 
   function createTacSelDiv() {
     const div = document.createElement("div");
-    setupMainDiv(div);
+    setupTacticsSelectorDiv(div);
     return div;
   }
 
-  function createDropdownMenu() {
+  function createTacticsDropdownMenu() {
     const dropdown = document.createElement("select");
     setupDropdownMenu(dropdown, "tactics_dropdown_menu");
+    appendChildren(dropdown, [createPlaceholderOption()]);
 
-    const placeholderOption = createPlaceholderOption();
-    appendChildren(dropdown, [placeholderOption]);
+    const label = document.createElement("span");
+    setupDropdownMenuLabel(
+      label,
+      "tactics_dropdown_menu_label",
+      strings.tacticsDropdownMenuLabel
+    );
 
-    return dropdown;
-  }
-
-  function createDropdownDescription() {
-    const description = document.createElement("span");
-    setupDropdownMenuLabel(description, "dropdown_description", "Select a tactic: ");
-    return description;
+    const container = document.createElement("div");
+    appendChildren(container, [label, dropdown]);
+    return container;
   }
 
   function createHiddenTriggerButton() {
@@ -208,7 +271,6 @@
     }
 
     removeTacticSlotInvalidStatus();
-
     updateFormationText(getFormation(coordinates));
   }
 
@@ -264,7 +326,7 @@
 
   function createAddNewTacticButton() {
     const button = document.createElement("button");
-    setupButton(button, "add_button", "Add current tactic");
+    setupButton(button, "add_button", strings.addButton);
 
     button.addEventListener("click", function () {
       addNewTactic().catch(console.error);
@@ -274,10 +336,12 @@
   }
 
   async function addNewTactic() {
-    const tacticsDropdown = document.getElementById("tactics_dropdown_menu");
-
     const outfieldPlayers = Array.from(
       document.querySelectorAll(outfieldPlayersSelector)
+    );
+
+    const tacticsDropdownMenu = document.getElementById(
+      "tactics_dropdown_menu"
     );
 
     const tacticCoordinates = outfieldPlayers.map((player) => [
@@ -292,11 +356,11 @@
     const tacticId = generateUniqueId(tacticCoordinates);
     const isDuplicate = await validateDuplicateTactic(tacticId);
     if (isDuplicate) {
-      alert("Error: a tactic with the exact same coordinates already exists.");
+      alert(strings.duplicateTacticError);
       return;
     }
 
-    const tacticName = prompt("Please enter a name for the tactic: ");
+    const tacticName = prompt(strings.tacticNamePrompt);
     const isValidName = await validateTacticName(tacticName);
     if (!isValidName) {
       return;
@@ -309,13 +373,13 @@
     };
 
     saveTacticToStorage(tactic).catch(console.error);
-    addTacticsToDropdown(tacticsDropdown, [tactic]);
+    addTacticsToDropdown(tacticsDropdownMenu, [tactic]);
     dropdownTactics.push(tactic);
 
-    tacticsDropdown.value = tactic.name;
+    tacticsDropdownMenu.value = tactic.name;
     handleTacticSelection(tactic.name);
 
-    alert(`Tactic "${tactic.name}" has been added.`);
+    alert(strings.addAlert.replace("{}", tactic.name));
   }
 
   function validateTacticPlayerCount(outfieldPlayers) {
@@ -326,9 +390,7 @@
     );
 
     if (outfieldPlayers.length < minOutfieldPlayers || !isGoalkeeper) {
-      alert(
-        "Error: invalid tactic. You must have 1 goalkeeper and 10 outfield players in valid positions."
-      );
+      alert(strings.invalidTacticError);
       return false;
     }
 
@@ -342,20 +404,18 @@
 
   async function validateTacticName(name) {
     if (!name) {
-      alert("Error: you must provide a name for the tactic.");
+      alert(strings.noTacticNameProvidedError);
       return false;
     }
 
     const tacticsData = (await GM_getValue("ls_tactics")) || { tactics: [] };
     if (tacticsData.tactics.some((t) => t.name === name)) {
-      alert(
-        "Error: a tactic with this name already exists. Please choose a different name."
-      );
+      alert(strings.alreadyExistingTacticNameError);
       return false;
     }
 
     if (name.length > maxTacticNameLength) {
-      alert("Error: tactic name must be less than 50 characters.");
+      alert(strings.tacticNameLengthError);
       return false;
     }
 
@@ -372,7 +432,7 @@
 
   function createDeleteTacticButton() {
     const button = document.createElement("button");
-    setupButton(button, "delete_button", "Delete tactic");
+    setupButton(button, "delete_button", strings.deleteButton);
 
     button.addEventListener("click", function () {
       deleteTactic().catch(console.error);
@@ -382,18 +442,21 @@
   }
 
   async function deleteTactic() {
-    const tacticsDropdown = document.getElementById("tactics_dropdown_menu");
+    const tacticsDropdownMenu = document.getElementById(
+      "tactics_dropdown_menu"
+    );
+
     const selectedTactic = dropdownTactics.find(
-      (tactic) => tactic.name === tacticsDropdown.value
+      (tactic) => tactic.name === tacticsDropdownMenu.value
     );
 
     if (!selectedTactic) {
-      alert("Error: no tactic selected.");
+      alert(strings.noTacticSelectedError);
       return;
     }
 
     const confirmed = confirm(
-      `Are you sure you want to delete the tactic "${selectedTactic.name}"?`
+      strings.deleteConfirmation.replace("{}", selectedTactic.name)
     );
 
     if (!confirmed) {
@@ -411,23 +474,23 @@
       (tactic) => tactic.id !== selectedTactic.id
     );
 
-    const selectedOption = Array.from(tacticsDropdown.options).find(
+    const selectedOption = Array.from(tacticsDropdownMenu.options).find(
       (option) => option.value === selectedTactic.name
     );
-    tacticsDropdown.remove(selectedOption.index);
+    tacticsDropdownMenu.remove(selectedOption.index);
 
-    if (tacticsDropdown.options[0]?.disabled) {
-      tacticsDropdown.selectedIndex = 0;
+    if (tacticsDropdownMenu.options[0]?.disabled) {
+      tacticsDropdownMenu.selectedIndex = 0;
     }
 
-    alert(`Tactic "${selectedTactic.name}" was successfully deleted!`);
+    alert(strings.deleteAlert.replace("{}", selectedTactic.name));
   }
 
   // _____Rename tactic_____
 
   function createRenameTacticButton() {
     const button = document.createElement("button");
-    setupButton(button, "rename_button", "Rename tactic");
+    setupButton(button, "rename_button", strings.renameButton);
 
     button.addEventListener("click", function () {
       renameTactic().catch(console.error);
@@ -437,25 +500,28 @@
   }
 
   async function renameTactic() {
-    const tacticsDropdown = document.getElementById("tactics_dropdown_menu");
+    const tacticsDropdownMenu = document.getElementById(
+      "tactics_dropdown_menu"
+    );
+
     const selectedTactic = dropdownTactics.find(
-      (tactic) => tactic.name === tacticsDropdown.value
+      (tactic) => tactic.name === tacticsDropdownMenu.value
     );
 
     if (!selectedTactic) {
-      alert("Error: no tactic selected.");
+      alert(strings.noTacticSelectedError);
       return;
     }
 
     const oldName = selectedTactic.name;
 
-    const newName = prompt("Please enter a new name for this tactic: ");
+    const newName = prompt(strings.tacticNamePrompt);
     const isValidName = await validateTacticName(newName);
     if (!isValidName) {
       return;
     }
 
-    const selectedOption = Array.from(tacticsDropdown.options).find(
+    const selectedOption = Array.from(tacticsDropdownMenu.options).find(
       (option) => option.value === selectedTactic.name
     );
 
@@ -479,14 +545,15 @@
     selectedOption.value = newName;
     selectedOption.textContent = newName;
 
-    alert(`Tactic "${oldName}" has been renamed to "${newName}".`);
+    const replacements = [oldName, newName];
+    alert(strings.renameAlert.replace(/\{\}/g, () => replacements.shift()));
   }
 
   // _____Update tactic_____
 
   function createUpdateTacticButton() {
     const button = document.createElement("button");
-    setupButton(button, "update_button", "Update tactic");
+    setupButton(button, "update_button", strings.updateButton);
 
     button.addEventListener("click", function () {
       updateTactic().catch(console.error);
@@ -500,14 +567,16 @@
       document.querySelectorAll(outfieldPlayersSelector)
     );
 
-    const tacticsDropdown = document.getElementById("tactics_dropdown");
+    const tacticsDropdownMenu = document.getElementById(
+      "tactics_dropdown_menu"
+    );
 
     const selectedTactic = dropdownTactics.find(
-      (tactic) => tactic.name === tacticsDropdown.value
+      (tactic) => tactic.name === tacticsDropdownMenu.value
     );
 
     if (!selectedTactic) {
-      alert("Error: no tactic selected.");
+      alert(strings.noTacticSelectedError);
       return;
     }
 
@@ -527,9 +596,7 @@
       case "unchanged":
         return;
       case "duplicate":
-        alert(
-          "Error: a tactic with the exact same coordinates already exists."
-        );
+        alert(strings.duplicateTacticError);
         return;
       case "unique":
         break;
@@ -538,7 +605,7 @@
     }
 
     const confirmed = confirm(
-      `Are you sure you want to update "${selectedTactic.name}" coordinates?`
+      strings.updateConfirmation.replace("{}", selectedTactic.name)
     );
 
     if (!confirmed) {
@@ -561,9 +628,7 @@
 
     await GM_setValue("ls_tactics", tacticsData);
 
-    alert(
-      `Tactic "${selectedTactic.name}" coordinates were successfully updated!`
-    );
+    alert(strings.updateAlert.replace("{}", selectedTactic.name));
   }
 
   async function validateDuplicateTacticWithUpdatedCoord(newId, selectedTac) {
@@ -581,7 +646,7 @@
 
   function createClearTacticsButton() {
     const button = document.createElement("button");
-    setupButton(button, "clear_button", "Clear tactics");
+    setupButton(button, "clear_button", strings.clearButton);
 
     button.addEventListener("click", function () {
       clearTactics().catch(console.error);
@@ -591,9 +656,7 @@
   }
 
   async function clearTactics() {
-    const confirmed = confirm(
-      "Are you sure you want to clear all tactics? This action will delete all saved tactics and cannot be undone."
-    );
+    const confirmed = confirm(strings.clearConfirmation);
 
     if (!confirmed) {
       return;
@@ -602,18 +665,20 @@
     await GM_setValue("ls_tactics", { tactics: [] });
     dropdownTactics = [];
 
-    const tacticsDropdown = document.getElementById("tactics_dropdown_menu");
-    tacticsDropdown.innerHTML = "";
-    tacticsDropdown.disabled = true;
+    const tacticsDropdownMenu = document.getElementById(
+      "tactics_dropdown_menu"
+    );
+    tacticsDropdownMenu.innerHTML = "";
+    tacticsDropdownMenu.disabled = true;
 
-    alert("Tactics successfully cleared!");
+    alert(strings.clearAlert);
   }
 
   // _____Reset default settings_____
 
   function createResetTacticsButton() {
     const button = document.createElement("button");
-    setupButton(button, "reset_button", "Reset tactics");
+    setupButton(button, "reset_button", strings.resetButton);
 
     button.addEventListener("click", function () {
       resetTactics().catch(console.error);
@@ -623,9 +688,7 @@
   }
 
   async function resetTactics() {
-    const confirmed = confirm(
-      "Are you sure you want to reset? This action will overwrite all saved tactics and cannot be undone."
-    );
+    const confirmed = confirm(strings.resetConfirmation);
 
     if (!confirmed) {
       return;
@@ -638,20 +701,22 @@
     await GM_setValue("ls_tactics", { tactics: defaultTactics });
     dropdownTactics = defaultTactics;
 
-    const tacticsDropdown = document.getElementById("tactics_dropdown_menu");
-    tacticsDropdown.innerHTML = "";
-    tacticsDropdown.appendChild(createPlaceholderOption());
-    addTacticsToDropdown(tacticsDropdown, dropdownTactics);
-    tacticsDropdown.disabled = false;
+    const tacticsDropdownMenu = document.getElementById(
+      "tactics_dropdown_menu"
+    );
+    tacticsDropdownMenu.innerHTML = "";
+    tacticsDropdownMenu.appendChild(createPlaceholderOption());
+    addTacticsToDropdown(tacticsDropdownMenu, dropdownTactics);
+    tacticsDropdownMenu.disabled = false;
 
-    alert("Reset done!");
+    alert(strings.resetAlert);
   }
 
   // _____Import/Export_____
 
   function createImportTacticsButton() {
     const button = document.createElement("button");
-    setupButton(button, "import_button", "Import tactics");
+    setupButton(button, "import_button", strings.importButton);
 
     button.addEventListener("click", function () {
       importTactics().catch(console.error);
@@ -662,7 +727,7 @@
 
   function createExportTacticsButton() {
     const button = document.createElement("button");
-    setupButton(button, "export_button", "Export tactics");
+    setupButton(button, "export_button", strings.exportButton);
     button.addEventListener("click", exportTactics);
     return button;
   }
@@ -692,15 +757,17 @@
         }
 
         await GM_setValue("ls_tactics", { tactics: mergedTactics });
-        mergedTactics.sort((a, b) => a.name.localeCompare(b.name));
 
+        mergedTactics.sort((a, b) => a.name.localeCompare(b.name));
         dropdownTactics = mergedTactics;
 
-        const tacticsDropdown = document.getElementById("tactics_dropdown_menu");
-        tacticsDropdown.innerHTML = "";
-        tacticsDropdown.append(createPlaceholderOption());
-        addTacticsToDropdown(tacticsDropdown, dropdownTactics);
-        tacticsDropdown.disabled = false;
+        const tacticsDropdownMenu = document.getElementById(
+          "tactics_dropdown_menu"
+        );
+        tacticsDropdownMenu.innerHTML = "";
+        tacticsDropdownMenu.append(createPlaceholderOption());
+        addTacticsToDropdown(tacticsDropdownMenu, dropdownTactics);
+        tacticsDropdownMenu.disabled = false;
       };
 
       reader.readAsText(file);
@@ -727,7 +794,7 @@
 
   function createAboutButton() {
     const button = document.createElement("button");
-    setupButton(button, "about_button", "About");
+    setupButton(button, "about_button", strings.aboutButton);
 
     button.addEventListener("click", function (event) {
       event.stopPropagation();
@@ -816,6 +883,7 @@
 
   function createTitle() {
     const title = document.createElement("h2");
+    title.id = "info_modal_title";
     title.textContent = "MZ Tactics Selector";
     title.style.fontSize = "24px";
     title.style.fontWeight = "bold";
@@ -825,16 +893,87 @@
 
   function createInfoText() {
     const infoText = document.createElement("p");
-    infoText.innerHTML =
-      'For instructions, click <a href="https://greasyfork.org/pt-BR/scripts/467712-mz-tactics-selector" style="color: #007BFF;">here</a>.';
+    infoText.id = "info_modal_info_text";
+    infoText.innerHTML = strings.modalContentInfoText;
     return infoText;
   }
 
   function createFeedbackText() {
     const feedbackText = document.createElement("p");
-    feedbackText.innerHTML =
-      'If you run into any issues or have any suggestions, contact me here: <a href="https://www.managerzone.com/?p=guestbook&uid=8577497"><img src="https://www.managerzone.com/img/soccer/reply_guestbook.gif"></a>';
+    feedbackText.id = "info_modal_feedback_text";
+    feedbackText.innerHTML = strings.modalContentFeedbackText;
     return feedbackText;
+  }
+
+  // _____Language Dropdown Menu_____
+
+  function createLanguageDropdownMenu() {
+    const dropdown = document.createElement("select");
+    setupDropdownMenu(dropdown, "language_dropdown_menu");
+
+    for (const lang of languages) {
+      const option = document.createElement("option");
+      option.value = lang.code;
+      option.textContent = lang.name;
+      if (lang.code === savedLanguage) {
+        option.selected = true;
+      }
+      dropdown.appendChild(option);
+    }
+
+    dropdown.addEventListener("change", function () {
+      changeLanguage(this.value).catch(console.error);
+    });
+
+    const label = document.createElement("span");
+    setupDropdownMenuLabel(
+      label,
+      "language_dropdown_menu_label",
+      strings.languageDropdownMenuLabel
+    );
+
+    const container = document.createElement("div");
+    appendChildren(container, [dropdown, label]);
+    return container;
+  }
+
+  async function changeLanguage(languageCode) {
+    try {
+      const translationDataUrl = `https://raw.githubusercontent.com/douglasdotv/tactics-selector/main/json/lang/${languageCode}.json?callback=?`;
+      const translations = await (await fetch(translationDataUrl)).json();
+      i18next.changeLanguage(languageCode);
+      i18next.addResourceBundle(languageCode, "translation", translations);
+      localStorage.setItem("language", languageCode);
+      updateTranslation();
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  function updateTranslation() {
+    for (let key in strings) {
+      strings[key] = i18next.t(key);
+    }
+
+    document.getElementById("tactics_dropdown_menu_label").textContent =
+      strings.tacticsDropdownMenuLabel;
+    document.getElementById("language_dropdown_menu_label").textContent =
+      strings.languageDropdownMenuLabel;
+
+    document.getElementById("add_button").textContent = strings.addButton;
+    document.getElementById("delete_button").textContent = strings.deleteButton;
+    document.getElementById("rename_button").textContent = strings.renameButton;
+    document.getElementById("update_button").textContent = strings.updateButton;
+    document.getElementById("clear_button").textContent = strings.clearButton;
+    document.getElementById("reset_button").textContent = strings.resetButton;
+    document.getElementById("import_button").textContent = strings.importButton;
+    document.getElementById("export_button").textContent = strings.exportButton;
+    document.getElementById("about_button").textContent = strings.aboutButton;
+
+    document.getElementById("info_modal_info_text").innerHTML =
+      strings.modalContentInfoText;
+    document.getElementById("info_modal_feedback_text").innerHTML =
+      strings.modalContentFeedbackText;
   }
 
   // _____Other_____
@@ -861,7 +1000,7 @@
     element.parentNode.insertBefore(something, element.nextSibling);
   }
 
-  function setupMainDiv(div) {
+  function setupTacticsSelectorDiv(div) {
     div.id = "tactics_selector_div";
     div.style.width = "100%";
     div.style.display = "flex";
