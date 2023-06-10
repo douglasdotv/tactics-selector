@@ -828,20 +828,6 @@
     return button;
   }
 
-  function showInfo() {
-    infoModal.style.display = "block";
-    setTimeout(function () {
-      infoModal.style.opacity = "1";
-    }, 0);
-  }
-
-  function hideInfo() {
-    infoModal.style.opacity = "0";
-    setTimeout(function () {
-      infoModal.style.display = "none";
-    }, 500);
-  }
-
   function createInfoModal() {
     const modal = document.createElement("div");
     setupModal(modal, "info_modal");
@@ -858,18 +844,6 @@
     return modal;
   }
 
-  function setupModal(modal, id) {
-    modal.id = id;
-    modal.style.display = "none";
-    modal.style.position = "fixed";
-    modal.style.zIndex = "1";
-    modal.style.left = "50%";
-    modal.style.top = "50%";
-    modal.style.transform = "translate(-50%, -50%)";
-    modal.style.opacity = "0";
-    modal.style.transition = "opacity 0.5s ease-in-out";
-  }
-
   function createModalContent() {
     const modalContent = document.createElement("div");
     styleModalContent(modalContent);
@@ -883,21 +857,6 @@
     modalContent.appendChild(feedbackText);
 
     return modalContent;
-  }
-
-  function styleModalContent(content) {
-    content.style.backgroundColor = "#fefefe";
-    content.style.margin = "auto";
-    content.style.padding = "20px";
-    content.style.border = "1px solid #888";
-    content.style.width = "80%";
-    content.style.maxWidth = "500px";
-    content.style.borderRadius = "10px";
-    content.style.fontFamily = "Montserrat, sans-serif";
-    content.style.textAlign = "center";
-    content.style.color = "#000";
-    content.style.fontSize = "16px";
-    content.style.lineHeight = "1.5";
   }
 
   function createTitle() {
@@ -922,6 +881,47 @@
     feedbackText.id = "info_modal_feedback_text";
     feedbackText.innerHTML = strings.modalContentFeedbackText;
     return feedbackText;
+  }
+
+  function showInfo() {
+    infoModal.style.display = "block";
+    setTimeout(function () {
+      infoModal.style.opacity = "1";
+    }, 0);
+  }
+
+  function hideInfo() {
+    infoModal.style.opacity = "0";
+    setTimeout(function () {
+      infoModal.style.display = "none";
+    }, 500);
+  }
+
+  function setupModal(modal, id) {
+    modal.id = id;
+    modal.style.display = "none";
+    modal.style.position = "fixed";
+    modal.style.zIndex = "1";
+    modal.style.left = "50%";
+    modal.style.top = "50%";
+    modal.style.transform = "translate(-50%, -50%)";
+    modal.style.opacity = "0";
+    modal.style.transition = "opacity 0.5s ease-in-out";
+  }
+
+  function styleModalContent(content) {
+    content.style.backgroundColor = "#fefefe";
+    content.style.margin = "auto";
+    content.style.padding = "20px";
+    content.style.border = "1px solid #888";
+    content.style.width = "80%";
+    content.style.maxWidth = "500px";
+    content.style.borderRadius = "10px";
+    content.style.fontFamily = "Montserrat, sans-serif";
+    content.style.textAlign = "center";
+    content.style.color = "#000";
+    content.style.fontSize = "16px";
+    content.style.lineHeight = "1.5";
   }
 
   // _____Language Dropdown Menu_____
