@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    essenfc
-// @version      5.3
+// @version      5.
 // @description  Adds a dropdown menu with overused tactics.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
@@ -28,12 +28,14 @@
     gb: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/gb.svg",
     br: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/br.svg",
     cn: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/cn.svg",
+    pl: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/pl.svg",
   };
 
   const languages = [
     { code: "en", name: "English", flag: flagsDataUrl.gb },
-    { code: "ptbr", name: "Português", flag: flagsDataUrl.br },
+    { code: "pt", name: "Português", flag: flagsDataUrl.br },
     { code: "zh", name: "中文", flag: flagsDataUrl.cn },
+    { code: "pl", name: "Polski", flag: flagsDataUrl.pl },
   ];
 
   let activeLanguage;
