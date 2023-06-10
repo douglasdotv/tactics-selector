@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    essenfc
-// @version      5.
+// @version      5.3
 // @description  Adds a dropdown menu with overused tactics.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
@@ -28,6 +28,9 @@
     gb: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/gb.svg",
     br: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/br.svg",
     cn: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/cn.svg",
+    no: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/no.svg",
+    se: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/se.svg",
+    ar: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/ar.svg",
     pl: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/pl.svg",
   };
 
@@ -35,6 +38,9 @@
     { code: "en", name: "English", flag: flagsDataUrl.gb },
     { code: "pt", name: "Português", flag: flagsDataUrl.br },
     { code: "zh", name: "中文", flag: flagsDataUrl.cn },
+    { code: "no", name: "Norsk", flag: flagsDataUrl.no },
+    { code: "sv", name: "Svenska", flag: flagsDataUrl.se },
+    { code: "es", name: "Español", flag: flagsDataUrl.ar },
     { code: "pl", name: "Polski", flag: flagsDataUrl.pl },
   ];
 
