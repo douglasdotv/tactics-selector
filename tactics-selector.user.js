@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
-// @version      4.6
+// @version      4.7
 // @description  Adds a dropdown menu with overused tactics.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
@@ -9,6 +9,7 @@
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=managerzone.com
 // @grant        GM_getValue
 // @grant        GM_setValue
+// @require      https://unpkg.com/jssha@3.3.0/dist/sha256.js
 // @license      MIT
 // ==/UserScript==
 
@@ -264,7 +265,20 @@
     const outfieldPlayers = Array.from(
       document.querySelectorAll(outfieldPlayersSelector)
     );
+
+    const tacticCoordinates = outfieldPlayers.map((player) => [
+      parseInt(player.style.left),
+      parseInt(player.style.top),
+    ]);
+
     if (!validateTacticPlayerCount(outfieldPlayers)) {
+      return;
+    }
+
+    const tacticId = generateUniqueId(tacticCoordinates);
+    const isDuplicate = await validateDuplicateTactic(tacticId);
+    if (isDuplicate) {
+      alert("Error: a tactic with the exact same coordinates already exists.");
       return;
     }
 
@@ -274,15 +288,10 @@
       return;
     }
 
-    const coordinates = outfieldPlayers.map((player) => [
-      parseInt(player.style.left),
-      parseInt(player.style.top),
-    ]);
-
     const tactic = {
       name: tacticName,
-      coordinates,
-      id: generateUniqueId(),
+      coordinates: tacticCoordinates,
+      id: tacticId,
     };
 
     saveTacticToStorage(tactic).catch(console.error);
@@ -311,6 +320,12 @@
 
     return true;
   }
+
+  async function validateDuplicateTactic(id) {
+    const tacticsData = (await GM_getValue("ls_tactics")) || { tactics: [] };
+    return tacticsData.tactics.some((tactic) => tactic.id === id);
+  }
+
 
   async function validateTacticName(name) {
     if (!name) {
@@ -499,15 +514,27 @@
 
     const tacticsData = (await GM_getValue("ls_tactics")) || { tactics: [] };
 
+    const newId = generateUniqueId(updatedCoordinates);
+    if (
+      tacticsData.tactics.some(
+        (tactic) => tactic.id === newId && tactic.id !== selectedTactic.id
+      )
+    ) {
+      alert("A tactic with these coordinates already exists.");
+      return;
+    }
+
     for (const tactic of tacticsData.tactics) {
       if (tactic.id === selectedTactic.id) {
         tactic.coordinates = updatedCoordinates;
+        tactic.id = newId;
       }
     }
 
     for (const tactic of dropdownTactics) {
       if (tactic.id === selectedTactic.id) {
         tactic.coordinates = updatedCoordinates;
+        tactic.id = newId;
       }
     }
 
@@ -855,22 +882,22 @@
     button.style.boxShadow = "3px 3px 5px rgba(0, 0, 0, 0.2)";
   }
 
-  function generateUniqueId() {
-    const currentDate = new Date();
-    return (
-      currentDate.getFullYear() +
-      "-" +
-      (currentDate.getMonth() + 1) +
-      "-" +
-      currentDate.getDate() +
-      "_" +
-      currentDate.getHours() +
-      "-" +
-      currentDate.getMinutes() +
-      "-" +
-      currentDate.getSeconds() +
-      "_" +
-      Math.random().toString(36).substring(2, 15)
+  function generateUniqueId(coordinates) {
+    const sortedCoordinates = coordinates.sort(
+      (a, b) => a[1] - b[1] || a[0] - b[0]
     );
+
+    const coordString = sortedCoordinates
+      .map((coord) => `${coord[1]}_${coord[0]}`)
+      .join("_");
+
+    return sha256Hash(coordString);
+  }
+
+  function sha256Hash(str) {
+    const shaObj = new jsSHA("SHA-256", "TEXT");
+    shaObj.update(str);
+    const hash = shaObj.getHash("HEX");
+    return hash;
   }
 })();
