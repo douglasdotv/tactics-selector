@@ -1,11 +1,12 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
-// @version      5.6
+// @version      6.0
 // @description  Adds a dropdown menu with overused tactics.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
 // @match        https://www.managerzone.com/?p=national_teams&sub=tactics&type=*
+// @match        https://www.managerzone.com/?p=players
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=managerzone.com
 // @grant        GM_getValue
 // @grant        GM_setValue
@@ -26,6 +27,8 @@ GM_addStyle(
 
   const defaultTacticsDataUrl =
     "https://raw.githubusercontent.com/douglasdotv/tactics-selector/main/json/tactics.json?callback=?";
+
+  let activeLanguage;
 
   const flagsDataUrl = {
     gb: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/gb.svg",
@@ -69,8 +72,6 @@ GM_addStyle(
     { code: "ar", name: "العربية", flag: flagsDataUrl.sa },
   ];
 
-  let activeLanguage;
-
   const strings = {
     addButton: "",
     deleteButton: "",
@@ -104,9 +105,15 @@ GM_addStyle(
     languageDropdownMenuLabel: "",
   };
 
+  let infoModal;
+
   const tacticsBox = document.getElementById("tactics_box");
 
   const tacticsPreset = document.getElementById("tactics_preset");
+
+  const isFootball = function () {
+    return tacticsBox.classList.contains("soccer");
+  };
 
   const outfieldPlayersSelector =
     ".fieldpos.fieldpos-ok.ui-draggable:not(.substitute):not(.goalkeeper):not(.substitute.goalkeeper), .fieldpos.fieldpos-collision.ui-draggable:not(.substitute):not(.goalkeeper):not(.substitute.goalkeeper)";
@@ -123,119 +130,108 @@ GM_addStyle(
   const maxTacticNameLength = 50;
 
   async function initialize() {
-    activeLanguage = getActiveLanguage();
-    i18next
-      .init({
-        lng: activeLanguage,
-        resources: {
-          [activeLanguage]: {
-            translation: await (
-              await fetch(
-                `https://raw.githubusercontent.com/douglasdotv/tactics-selector/main/json/lang/${activeLanguage}.json?callback=?`
-              )
-            ).json(),
+    if (tacticsBox) {
+      activeLanguage = getActiveLanguage();
+      i18next
+        .init({
+          lng: activeLanguage,
+          resources: {
+            [activeLanguage]: {
+              translation: await (
+                await fetch(
+                  `https://raw.githubusercontent.com/douglasdotv/tactics-selector/main/json/lang/${activeLanguage}.json?callback=?`
+                )
+              ).json(),
+            },
           },
-        },
-      })
-      .then(() => {
-        const tacticsSelectorDiv = createMainDiv();
-        const firstRow = createMainDivFirstRow();
-        const secondRow = createMainDivSecondRow();
+        })
+        .then(() => {
+          const tacticsSelectorDiv = createMainDiv();
+          const firstRow = createMainDivFirstRow();
+          const secondRow = createMainDivSecondRow();
 
-        const tacticsDropdownMenuLabel = createTacticsDropdownMenuLabel();
-        const tacticsDropdownMenu = createTacticsDropdownMenu();
-        const tacticsDropdownGroup = createLabelDropdownMenuGroup(
-          tacticsDropdownMenuLabel,
-          tacticsDropdownMenu
-        );
+          const tacticsDropdownMenuLabel = createTacticsDropdownMenuLabel();
+          const tacticsDropdownMenu = createTacticsDropdownMenu();
+          const tacticsDropdownGroup = createLabelDropdownMenuGroup(
+            tacticsDropdownMenuLabel,
+            tacticsDropdownMenu
+          );
 
-        const languageDropdownMenuLabel = createLanguageDropdownMenuLabel();
-        const languageDropdownMenu = createLanguageDropdownMenu();
-        const languageDropdownGroup = createLabelDropdownMenuGroup(
-          languageDropdownMenuLabel,
-          languageDropdownMenu
-        );
-        const flagImage = createFlagImage();
-        languageDropdownGroup.appendChild(flagImage);
+          const languageDropdownMenuLabel = createLanguageDropdownMenuLabel();
+          const languageDropdownMenu = createLanguageDropdownMenu();
+          const languageDropdownGroup = createLabelDropdownMenuGroup(
+            languageDropdownMenuLabel,
+            languageDropdownMenu
+          );
+          const flagImage = createFlagImage();
+          languageDropdownGroup.appendChild(flagImage);
 
-        appendChildren(firstRow, [tacticsDropdownGroup, languageDropdownGroup]);
+          appendChildren(firstRow, [
+            tacticsDropdownGroup,
+            languageDropdownGroup,
+          ]);
 
-        const addNewTacticBtn = createAddNewTacticButton();
-        const deleteTacticBtn = createDeleteTacticButton();
-        const renameTacticBtn = createRenameTacticButton();
-        const updateTacticBtn = createUpdateTacticButton();
-        const clearTacticsBtn = createClearTacticsButton();
-        const resetTacticsBtn = createResetTacticsButton();
-        const importTacticsBtn = createImportTacticsButton();
-        const exportTacticsBtn = createExportTacticsButton();
-        const aboutBtn = createAboutButton();
-        const hiddenTriggerBtn = createHiddenTriggerButton();
+          const addNewTacticBtn = createAddNewTacticButton();
+          const deleteTacticBtn = createDeleteTacticButton();
+          const renameTacticBtn = createRenameTacticButton();
+          const updateTacticBtn = createUpdateTacticButton();
+          const clearTacticsBtn = createClearTacticsButton();
+          const resetTacticsBtn = createResetTacticsButton();
+          const importTacticsBtn = createImportTacticsButton();
+          const exportTacticsBtn = createExportTacticsButton();
+          const aboutBtn = createAboutButton();
+          const hiddenTriggerBtn = createHiddenTriggerButton();
 
-        appendChildren(secondRow, [
-          addNewTacticBtn,
-          deleteTacticBtn,
-          renameTacticBtn,
-          updateTacticBtn,
-          clearTacticsBtn,
-          resetTacticsBtn,
-          importTacticsBtn,
-          exportTacticsBtn,
-          aboutBtn,
-        ]);
+          appendChildren(secondRow, [
+            addNewTacticBtn,
+            deleteTacticBtn,
+            renameTacticBtn,
+            updateTacticBtn,
+            clearTacticsBtn,
+            resetTacticsBtn,
+            importTacticsBtn,
+            exportTacticsBtn,
+            aboutBtn,
+          ]);
 
-        appendChildren(tacticsSelectorDiv, [
-          firstRow,
-          secondRow,
-          hiddenTriggerBtn,
-        ]);
+          appendChildren(tacticsSelectorDiv, [
+            firstRow,
+            secondRow,
+            hiddenTriggerBtn,
+          ]);
 
-        const isFootball = function () {
-          return document
-            .getElementById("tactics_box")
-            .classList.contains("soccer");
-        };
+          if (isFootball) {
+            insertAfterElement(tacticsSelectorDiv, tacticsBox);
+          }
 
-        if (isFootball) {
-          insertAfterElement(tacticsSelectorDiv, tacticsBox);
-        }
+          fetchTacticsFromGMStorage()
+            .then((data) => {
+              dropdownTactics = data.tactics;
 
-        fetchTacticsFromGMStorage()
-          .then((data) => {
-            dropdownTactics = data.tactics;
+              dropdownTactics.sort((a, b) => {
+                return a.name.localeCompare(b.name);
+              });
 
-            dropdownTactics.sort((a, b) => {
-              return a.name.localeCompare(b.name);
+              addTacticsToDropdown(tacticsDropdownMenu, dropdownTactics);
+
+              tacticsDropdownMenu.addEventListener("change", function () {
+                handleTacticSelection(this.value);
+              });
+            })
+            .catch((err) => {
+              console.error("Couldn't fetch data from json: ", err);
             });
-
-            addTacticsToDropdown(tacticsDropdownMenu, dropdownTactics);
-
-            tacticsDropdownMenu.addEventListener("change", function () {
-              handleTacticSelection(this.value);
-            });
-          })
-          .catch((err) => {
-            console.error("Couldn't fetch data from json: ", err);
-          });
-
-        updateTranslation();
-      });
+          setInfoModal();
+          updateTranslation();
+        });
+    }
+    applyUxxFilter();
   }
 
   window.addEventListener("load", function () {
     initialize().catch((err) => {
       console.error("Init error: ", err);
     });
-  });
-
-  const infoModal = createInfoModal();
-  document.body.appendChild(infoModal);
-  document.addEventListener("click", function (event) {
-    if (
-      infoModal.style.display === "block" &&
-      !infoModal.contains(event.target)
-    ) {
-      infoModal.style.display = "none";
-    }
   });
 
   // _____Tactics Dropdown Menu_____
@@ -948,6 +944,19 @@ GM_addStyle(
     }, 500);
   }
 
+  function setInfoModal() {
+    infoModal = createInfoModal();
+    document.body.appendChild(infoModal);
+    document.addEventListener("click", function (event) {
+      if (
+        infoModal.style.display === "block" &&
+        !infoModal.contains(event.target)
+      ) {
+        infoModal.style.display = "none";
+      }
+    });
+  }
+
   function setupModal(modal, id) {
     modal.id = id;
     modal.style.display = "none";
@@ -1076,6 +1085,17 @@ GM_addStyle(
   }
 
   // _____Other_____
+
+  function applyUxxFilter() {
+    $(".age-wrapper label").append(
+      '<a href="#"> 16 </a><a href="#"> 17 </a><a href="#"> 18 </a><a href="#"> 19 </a><a href="#"> 20 </a><a href="#"> 21 </a>'
+    );
+    $(".age-wrapper label a").click(function () {
+      $("#age_to").val($(this).text().trim());
+      $("#age_to").change();
+      $("#filterSubmit").click();
+    });
+  }
 
   function appendChildren(parent, children) {
     children.forEach((ch) => {
