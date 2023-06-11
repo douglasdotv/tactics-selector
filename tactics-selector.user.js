@@ -9,15 +9,18 @@
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=managerzone.com
 // @grant        GM_getValue
 // @grant        GM_setValue
+// @grant        GM_addStyle
 // @require      https://unpkg.com/jssha@3.3.0/dist/sha256.js
 // @require      https://unpkg.com/i18next@21.6.3/i18next.min.js
 // @license      MIT
 // ==/UserScript==
 
+GM_addStyle(
+  "@import url('https://fonts.googleapis.com/css2?family=Montserrat&display=swap');"
+);
+
 (function () {
   "use strict";
-
-  document.head.appendChild(getFontLink());
 
   let dropdownTactics = [];
 
@@ -1073,14 +1076,6 @@
   }
 
   // _____Other_____
-
-  function getFontLink() {
-    const fontLink = document.createElement("link");
-    fontLink.href =
-      "https://fonts.googleapis.com/css2?family=Montserrat&display=swap";
-    fontLink.rel = "stylesheet";
-    return fontLink;
-  }
 
   function appendChildren(parent, children) {
     children.forEach((ch) => {
