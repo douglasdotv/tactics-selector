@@ -186,7 +186,13 @@
           hiddenTriggerBtn,
         ]);
 
-        if (isSoccerTacticsPage()) {
+        const isFootball = function () {
+          return document
+            .getElementById("tactics_box")
+            .classList.contains("soccer");
+        };
+
+        if (isFootball) {
           insertAfterElement(tacticsSelectorDiv, tacticsBox);
         }
 
@@ -1050,24 +1056,20 @@
       strings.modalContentInfoText;
     document.getElementById("info_modal_feedback_text").innerHTML =
       strings.modalContentFeedbackText;
-    document.getElementById("about_button").textContent = 
-      strings.aboutButton;
+    document.getElementById("about_button").textContent = strings.aboutButton;
   }
 
   function getActiveLanguage() {
-    return new Promise((resolve, reject) => {
-      GM_getValue("language", function (language) {
-        if (!language) {
-          let browserLanguage = navigator.language || "en";
-          browserLanguage = browserLanguage.split("-")[0];
-          const languageExists = languages.some(
-            (lang) => lang.code === browserLanguage
-          );
-          language = languageExists ? browserLanguage : "en";
-        }
-        resolve(language);
-      });
-    });
+    let language = GM_getValue("language");
+    if (!language) {
+      let browserLanguage = navigator.language || "en";
+      browserLanguage = browserLanguage.split("-")[0];
+      const languageExists = languages.some(
+        (lang) => lang.code === browserLanguage
+      );
+      language = languageExists ? browserLanguage : "en";
+    }
+    return language;
   }
 
   // _____Other_____
@@ -1078,10 +1080,6 @@
       "https://fonts.googleapis.com/css2?family=Montserrat&display=swap";
     fontLink.rel = "stylesheet";
     return fontLink;
-  }
-
-  function isSoccerTacticsPage() {
-    return document.getElementById("tactics_box").classList.contains("soccer");
   }
 
   function appendChildren(parent, children) {
