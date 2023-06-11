@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
-// @version      5.5
+// @version      5.6
 // @description  Adds a dropdown menu with overused tactics.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
@@ -120,7 +120,7 @@
   const maxTacticNameLength = 50;
 
   async function initialize() {
-    activeLanguage = localStorage.getItem("language") || "en";
+    activeLanguage = getActiveLanguage();
     i18next
       .init({
         lng: activeLanguage,
@@ -1042,15 +1042,33 @@
       strings.importButton;
     document.getElementById("export_tactics_button").textContent =
       strings.exportButton;
-    document.getElementById("about_button").textContent = strings.aboutButton;
-    document.getElementById("info_modal_info_text").innerHTML =
-      strings.modalContentInfoText;
-    document.getElementById("info_modal_feedback_text").innerHTML =
-      strings.modalContentFeedbackText;
+    document.getElementById("about_button").textContent = 
+      strings.aboutButton;
     document.getElementById("tactics_dropdown_menu_label").textContent =
       strings.tacticsDropdownMenuLabel;
     document.getElementById("language_dropdown_menu_label").textContent =
       strings.languageDropdownMenuLabel;
+    document.getElementById("info_modal_info_text").innerHTML =
+      strings.modalContentInfoText;
+    document.getElementById("info_modal_feedback_text").innerHTML =
+      strings.modalContentFeedbackText;
+  }
+
+  function getActiveLanguage() {
+    let activeLanguage = localStorage.getItem("language");
+
+    if (!activeLanguage) {
+      let browserLanguage = navigator.language || "en";
+      browserLanguage = browserLanguage.split("-")[0];
+
+      const languageExists = languages.some(
+        (lang) => lang.code === browserLanguage
+      );
+
+      activeLanguage = languageExists ? browserLanguage : "en";
+    }
+
+    return activeLanguage;
   }
 
   // _____Other_____
