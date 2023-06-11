@@ -5,7 +5,7 @@
   "updateButton": "Actualizar táctica",
   "aboutButton": "Acerca de",
   "clearButton": "Borrar tácticas",
-  "resetButton": "Restablecer tácticas",
+  "resetButton": "Resetar tácticas",
   "importButton": "Importar tácticas",
   "exportButton": "Exportar tácticas",
   "tacticNamePrompt": "Por favor, ingresa un nombre para la táctica: ",
