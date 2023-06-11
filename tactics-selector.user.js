@@ -190,7 +190,7 @@
           insertAfterElement(tacticsSelectorDiv, tacticsBox);
         }
 
-        fetchTacticsFromLocalStorage()
+        fetchTacticsFromGMStorage()
           .then((data) => {
             dropdownTactics = data.tactics;
 
@@ -262,13 +262,13 @@
     return button;
   }
 
-  async function fetchTacticsFromLocalStorage() {
+  async function fetchTacticsFromGMStorage() {
     const storedTactics = GM_getValue("ls_tactics");
     if (storedTactics) {
       return storedTactics;
     } else {
       const jsonTactics = await fetchTacticsFromJson();
-      storeTacticsInLocalStorage(jsonTactics);
+      storeTacticsInGMStorage(jsonTactics);
       return jsonTactics;
     }
   }
@@ -278,7 +278,7 @@
     return await response.json();
   }
 
-  function storeTacticsInLocalStorage(data) {
+  function storeTacticsInGMStorage(data) {
     GM_setValue("ls_tactics", data);
   }
 
@@ -1007,7 +1007,7 @@
       i18next.changeLanguage(languageCode);
       i18next.addResourceBundle(languageCode, "translation", translations);
 
-      localStorage.setItem("language", languageCode);
+      GM_setValue("language", languageCode);
 
       updateTranslation();
 
@@ -1042,8 +1042,6 @@
       strings.importButton;
     document.getElementById("export_tactics_button").textContent =
       strings.exportButton;
-    document.getElementById("about_button").textContent = 
-      strings.aboutButton;
     document.getElementById("tactics_dropdown_menu_label").textContent =
       strings.tacticsDropdownMenuLabel;
     document.getElementById("language_dropdown_menu_label").textContent =
@@ -1052,23 +1050,24 @@
       strings.modalContentInfoText;
     document.getElementById("info_modal_feedback_text").innerHTML =
       strings.modalContentFeedbackText;
+    document.getElementById("about_button").textContent = 
+      strings.aboutButton;
   }
 
   function getActiveLanguage() {
-    let activeLanguage = localStorage.getItem("language");
-
-    if (!activeLanguage) {
-      let browserLanguage = navigator.language || "en";
-      browserLanguage = browserLanguage.split("-")[0];
-
-      const languageExists = languages.some(
-        (lang) => lang.code === browserLanguage
-      );
-
-      activeLanguage = languageExists ? browserLanguage : "en";
-    }
-
-    return activeLanguage;
+    return new Promise((resolve, reject) => {
+      GM_getValue("language", function (language) {
+        if (!language) {
+          let browserLanguage = navigator.language || "en";
+          browserLanguage = browserLanguage.split("-")[0];
+          const languageExists = languages.some(
+            (lang) => lang.code === browserLanguage
+          );
+          language = languageExists ? browserLanguage : "en";
+        }
+        resolve(language);
+      });
+    });
   }
 
   // _____Other_____
