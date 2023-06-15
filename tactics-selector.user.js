@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
-// @version      6.0
+// @version      6.1
 // @description  Adds a dropdown menu with overused tactics.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
@@ -1087,13 +1087,38 @@ GM_addStyle(
   // _____Other_____
 
   function applyUxxFilter() {
-    $(".age-wrapper label").append(
-      '<a href="#"> 16 </a><a href="#"> 17 </a><a href="#"> 18 </a><a href="#"> 19 </a><a href="#"> 20 </a><a href="#"> 21 </a>'
-    );
+    const minAge = 16;
+    const maxAge = 21;
+    let links = "";
+
+    for (let i = minAge; i <= maxAge; ++i) {
+      if (i !== minAge) {
+        links += " ";
+      }
+      links += '<a href="#">' + i + "</a>";
+    }
+
+    $(".age-wrapper label").append(" " + links);
+
+    let last = null;
     $(".age-wrapper label a").click(function () {
-      $("#age_to").val($(this).text().trim());
+      const current = $(this).text().trim();
+
+      if (last === current) {
+        $("#age_from").val(current);
+        $("#age_from").change();
+      }
+
+      $("#age_to").val(current);
       $("#age_to").change();
+
+      if (parseInt($("#age_from").val()) > parseInt($("#age_to").val())) {
+        $("#age_from").val($("#age_to").val());
+        $("#age_from").change();
+      }
+
       $("#filterSubmit").click();
+      last = current;
     });
   }
 
