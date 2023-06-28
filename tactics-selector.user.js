@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
-// @version      6.1
+// @version      6.2
 // @description  Adds a dropdown menu with overused tactics.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
@@ -111,10 +111,6 @@ GM_addStyle(
 
   const tacticsPreset = document.getElementById("tactics_preset");
 
-  const isFootball = function () {
-    return tacticsBox.classList.contains("soccer");
-  };
-
   const outfieldPlayersSelector =
     ".fieldpos.fieldpos-ok.ui-draggable:not(.substitute):not(.goalkeeper):not(.substitute.goalkeeper), .fieldpos.fieldpos-collision.ui-draggable:not(.substitute):not(.goalkeeper):not(.substitute.goalkeeper)";
 
@@ -200,7 +196,7 @@ GM_addStyle(
             hiddenTriggerBtn,
           ]);
 
-          if (isFootball) {
+          if (isFootball()) {
             insertAfterElement(tacticsSelectorDiv, tacticsBox);
           }
 
@@ -1120,6 +1116,11 @@ GM_addStyle(
       $("#filterSubmit").click();
       last = current;
     });
+  }
+
+  function isFootball() {
+    const element = document.querySelector("div#tactics_box.soccer.clearfix");
+    return !!element;
   }
 
   function appendChildren(parent, children) {
