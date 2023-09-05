@@ -1082,6 +1082,7 @@ GM_addStyle(
 
   // _____Other_____
 
+  // note: apply Uxx filter was initially crafted by kostrzak16 (Yelonki). The applyUxxFilter() function is a slightly modified version of his code.
   function applyUxxFilter() {
     const minAge = 16;
     const maxAge = 21;
