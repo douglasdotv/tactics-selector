@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
-// @namespace    essenfc
+// @namespace    douglaskampl
 // @version      6.2
-// @description  Adds a dropdown menu with overused tactics.
+// @description  Adds a dropdown menu with overused tactics and lets you save your own tactics for quick access later on.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
 // @match        https://www.managerzone.com/?p=national_teams&sub=tactics&type=*
@@ -176,6 +176,7 @@ GM_addStyle(
           const importTacticsBtn = createImportTacticsButton();
           const exportTacticsBtn = createExportTacticsButton();
           const aboutBtn = createAboutButton();
+          const musicBtn = createMusicButton();
           const hiddenTriggerBtn = createHiddenTriggerButton();
 
           appendChildren(secondRow, [
@@ -188,6 +189,7 @@ GM_addStyle(
             importTacticsBtn,
             exportTacticsBtn,
             aboutBtn,
+            musicBtn,
           ]);
 
           appendChildren(tacticsSelectorDiv, [
