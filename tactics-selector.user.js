@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
-// @version      6.2
+// @version      7.1
 // @description  Adds a dropdown menu with overused tactics and lets you save your own tactics for quick access later on.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
@@ -980,6 +980,28 @@ GM_addStyle(
         infoModal.style.display = "none";
       }
     });
+  }
+
+  // _____Music button_____
+
+  function createMusicButton() {
+    const button = document.createElement("button");
+    setupButton(button, "music_button", "♫");
+
+    const audio = new Audio(
+      "https://ia601404.us.archive.org/29/items/flying-beagle/3%20-%20Flying%20Beagle.mp3"
+    );
+    audio.loop = true;
+
+    button.addEventListener("click", function () {
+      toggleMusic(audio);
+    });
+
+    return button;
+  }
+
+  function toggleMusic(audio) {
+    audio.paused ? audio.play() : audio.pause();
   }
 
   // _____Language Dropdown Menu_____
