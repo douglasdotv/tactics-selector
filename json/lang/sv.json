@@ -26,7 +26,7 @@
   "noTacticSelectedError": "Fel: Ingen taktik vald.",
   "duplicateTacticError": "Fel: En taktik med exakt samma koordinater finns redan.",
   "modalContentInfoText": "För mer information, klicka <a href=\"https://greasyfork.org/pt-BR/scripts/467712-mz-tactics-selector\" style=\"color: #007BFF;\">här</a>.",
-  "modalContentFeedbackText": "Om du stöter på problem eller har några förslag, kontakta mig gärna här: <a href=\"https://www.managerzone.com/?p=guestbook&uid=8623925\"><img src=\"https://www.managerzone.com/img/soccer/reply_guestbook.gif\"></a>",
+  "modalContentFeedbackText": "Om du stöter på problem eller har några förslag, kontakta mig gärna här: <a href=\"https://www.managerzone.com/?p=guestbook&uid=8577497\"><img src=\"https://www.managerzone.com/img/soccer/reply_guestbook.gif\"></a>",
   "tacticsDropdownMenuLabel": "Välj en taktik: ",
   "languageDropdownMenuLabel": "Språk: "
 }

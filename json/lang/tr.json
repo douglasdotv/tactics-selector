@@ -26,7 +26,7 @@
   "noTacticSelectedError": "Hata: Hiçbir taktik seçilmedi.",
   "duplicateTacticError": "Hata: Aynı koordinatlara sahip bir taktik zaten mevcut.",
   "modalContentInfoText": "Daha fazla bilgi için <a href=\"https://greasyfork.org/pt-BR/scripts/467712-mz-tactics-selector\" style=\"color: #007BFF;\">buraya</a> tıklayın.",
-  "modalContentFeedbackText": "Herhangi bir sorunla karşılaşırsanız veya önerileriniz varsa, lütfen buradan benimle iletişime geçin: <a href=\"https://www.managerzone.com/?p=guestbook&uid=8623925\"><img src=\"https://www.managerzone.com/img/soccer/reply_guestbook.gif\"></a>",
+  "modalContentFeedbackText": "Herhangi bir sorunla karşılaşırsanız veya önerileriniz varsa, lütfen buradan benimle iletişime geçin: <a href=\"https://www.managerzone.com/?p=guestbook&uid=8577497\"><img src=\"https://www.managerzone.com/img/soccer/reply_guestbook.gif\"></a>",
   "tacticsDropdownMenuLabel": "Bir taktik seçin: ",
   "languageDropdownMenuLabel": "Dil: "
 }
