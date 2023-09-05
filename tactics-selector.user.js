@@ -2,7 +2,7 @@
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
 // @version      6.2
-// @description  Adds a dropdown menu with overused tactics.
+// @description  Adds a dropdown menu with overused tactics and lets you save your own tactics for quick access later on.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
 // @match        https://www.managerzone.com/?p=national_teams&sub=tactics&type=*
