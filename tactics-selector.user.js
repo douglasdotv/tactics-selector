@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
-// @version      6.2
+// @version      7.1
 // @description  Adds a dropdown menu with overused tactics and lets you save your own tactics for quick access later on.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
@@ -176,6 +176,7 @@ GM_addStyle(
           const importTacticsBtn = createImportTacticsButton();
           const exportTacticsBtn = createExportTacticsButton();
           const aboutBtn = createAboutButton();
+          const audioBtn = createAudioButton();
           const hiddenTriggerBtn = createHiddenTriggerButton();
 
           appendChildren(secondRow, [
@@ -188,6 +189,7 @@ GM_addStyle(
             importTacticsBtn,
             exportTacticsBtn,
             aboutBtn,
+            audioBtn,
           ]);
 
           appendChildren(tacticsSelectorDiv, [
@@ -953,6 +955,7 @@ GM_addStyle(
     });
   }
 
+
   function setupModal(modal, id) {
     modal.id = id;
     modal.style.display = "none";
@@ -978,6 +981,28 @@ GM_addStyle(
     content.style.color = "#000";
     content.style.fontSize = "16px";
     content.style.lineHeight = "1.5";
+  }
+
+  // _____Audio button_____
+
+  function createAudioButton() {
+    const button = document.createElement("button");
+    setupButton(button, "audio_button", "♫");
+
+    const audio = new Audio(
+      "https://ia802609.us.archive.org/16/items/w-w-w-d-e-e-p-d-i-v-e-c-o-m-wg7bkk/Webinar%E2%84%A2%20-%20w%20w%20w%20.%20d%20e%20e%20p%20d%20i%20v%20e%20.%20c%20o%20m%20-%2002%20%E6%B3%A2.mp3"
+    );
+    audio.loop = true;
+
+    button.addEventListener("click", function () {
+      toggleAudio(audio);
+    });
+
+    return button;
+  }
+
+  function toggleAudio(audio) {
+    audio.paused ? audio.play() : audio.pause();
   }
 
   // _____Language Dropdown Menu_____
