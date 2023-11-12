@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
-// @version      7.1
+// @version      7.2
 // @description  Adds a dropdown menu with overused tactics and lets you save your own tactics for quick access later on.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
@@ -23,7 +23,7 @@ GM_addStyle(
 (function () {
   "use strict";
 
-  let dropdownTactics = [];
+  let dropdownMenuTactics = [];
 
   const defaultTacticsDataUrl =
     "https://raw.githubusercontent.com/douglasdotv/tactics-selector/main/json/tactics.json?callback=?";
@@ -77,11 +77,11 @@ GM_addStyle(
     deleteButton: "",
     renameButton: "",
     updateButton: "",
-    aboutButton: "",
     clearButton: "",
     resetButton: "",
     importButton: "",
     exportButton: "",
+    aboutButton: "",
     tacticNamePrompt: "",
     addAlert: "",
     deleteAlert: "",
@@ -103,6 +103,22 @@ GM_addStyle(
     modalContentFeedbackText: "",
     tacticsDropdownMenuLabel: "",
     languageDropdownMenuLabel: "",
+  };
+
+  const elementStringKeys = {
+    add_tactic_button: "addButton",
+    delete_tactic_button: "deleteButton",
+    rename_tactic_button: "renameButton",
+    update_tactic_button: "updateButton",
+    clear_tactics_button: "clearButton",
+    reset_tactics_button: "resetButton",
+    import_tactics_button: "importButton",
+    export_tactics_button: "exportButton",
+    about_button: "aboutButton",
+    tactics_dropdown_menu_label: "tacticsDropdownMenuLabel",
+    language_dropdown_menu_label: "languageDropdownMenuLabel",
+    info_modal_info_text: "modalContentInfoText",
+    info_modal_feedback_text: "modalContentFeedbackText",
   };
 
   let infoModal;
@@ -142,78 +158,42 @@ GM_addStyle(
           },
         })
         .then(() => {
-          const tacticsSelectorDiv = createMainDiv();
-          const firstRow = createMainDivFirstRow();
-          const secondRow = createMainDivSecondRow();
-
-          const tacticsDropdownMenuLabel = createTacticsDropdownMenuLabel();
-          const tacticsDropdownMenu = createTacticsDropdownMenu();
-          const tacticsDropdownGroup = createLabelDropdownMenuGroup(
-            tacticsDropdownMenuLabel,
-            tacticsDropdownMenu
-          );
-
-          const languageDropdownMenuLabel = createLanguageDropdownMenuLabel();
-          const languageDropdownMenu = createLanguageDropdownMenu();
-          const languageDropdownGroup = createLabelDropdownMenuGroup(
-            languageDropdownMenuLabel,
-            languageDropdownMenu
-          );
-          const flagImage = createFlagImage();
-          languageDropdownGroup.appendChild(flagImage);
-
-          appendChildren(firstRow, [
-            tacticsDropdownGroup,
-            languageDropdownGroup,
-          ]);
-
-          const addNewTacticBtn = createAddNewTacticButton();
-          const deleteTacticBtn = createDeleteTacticButton();
-          const renameTacticBtn = createRenameTacticButton();
-          const updateTacticBtn = createUpdateTacticButton();
-          const clearTacticsBtn = createClearTacticsButton();
-          const resetTacticsBtn = createResetTacticsButton();
-          const importTacticsBtn = createImportTacticsButton();
-          const exportTacticsBtn = createExportTacticsButton();
-          const aboutBtn = createAboutButton();
-          const audioBtn = createAudioButton();
-          const hiddenTriggerBtn = createHiddenTriggerButton();
-
-          appendChildren(secondRow, [
-            addNewTacticBtn,
-            deleteTacticBtn,
-            renameTacticBtn,
-            updateTacticBtn,
-            clearTacticsBtn,
-            resetTacticsBtn,
-            importTacticsBtn,
-            exportTacticsBtn,
-            aboutBtn,
-            audioBtn,
-          ]);
-
-          appendChildren(tacticsSelectorDiv, [
-            firstRow,
-            secondRow,
-            hiddenTriggerBtn,
-          ]);
+          const tacticsSelectorDiv = createTacticsSelectorDiv();
 
           if (isFootball()) {
             insertAfterElement(tacticsSelectorDiv, tacticsBox);
           }
 
+          const firstRow = createRow("tactics_selector_div_first_row");
+          const secondRow = createRow("tactics_selector_div_second_row");
+
+          appendChildren(tacticsSelectorDiv, [
+            firstRow,
+            secondRow,
+            createHiddenTriggerButton(),
+          ]);
+
+          setupFirstRow();
+          setupSecondRow();
+
           fetchTacticsFromGMStorage()
             .then((data) => {
-              dropdownTactics = data.tactics;
+              const tacticsDropdownMenu = document.getElementById(
+                "tactics_dropdown_menu"
+              );
 
-              dropdownTactics.sort((a, b) => {
+              dropdownMenuTactics = data.tactics;
+              dropdownMenuTactics.sort((a, b) => {
                 return a.name.localeCompare(b.name);
               });
 
-              addTacticsToDropdown(tacticsDropdownMenu, dropdownTactics);
+              addTacticsToDropdownMenu(
+                tacticsDropdownMenu,
+                dropdownMenuTactics
+              );
 
               tacticsDropdownMenu.addEventListener("change", function () {
-                handleTacticSelection(this.value);
+                handleTacticsSelection(this.value);
               });
             })
             .catch((err) => {
@@ -241,17 +221,12 @@ GM_addStyle(
     return dropdown;
   }
 
-  function createTacticsDropdownMenuLabel() {
-    const label = document.createElement("span");
-    setupDropdownMenuLabel(
-      label,
-      "tactics_dropdown_menu_label",
-      strings.tacticsDropdownMenuLabel
-    );
-    return label;
-  }
-
   function createHiddenTriggerButton() {
+    /*
+     * The purpose of this button is to trigger the tactics preset change event: it changes the tactic to the default 5-3-2.
+     * It's a workaround to put 10 players on the field when the user has less than 10 players on the field and selects a tactic.
+     * If that happens, the pitch will be filled with 10 players in a 5-3-2 formation, then they will be rearranged to the selected tactic.
+     */
     const button = document.createElement("button");
     button.id = "hidden_trigger_button";
     button.textContent = "";
@@ -285,7 +260,7 @@ GM_addStyle(
     GM_setValue("ls_tactics", data);
   }
 
-  function addTacticsToDropdown(dropdown, tactics) {
+  function addTacticsToDropdownMenu(dropdown, tactics) {
     for (const tactic of tactics) {
       const option = document.createElement("option");
       option.value = tactic.name;
@@ -294,12 +269,12 @@ GM_addStyle(
     }
   }
 
-  function handleTacticSelection(tactic) {
+  function handleTacticsSelection(tactic) {
     const outfieldPlayers = Array.from(
       document.querySelectorAll(outfieldPlayersSelector)
     );
 
-    const selectedTactic = dropdownTactics.find(
+    const selectedTactic = dropdownMenuTactics.find(
       (tacticData) => tacticData.name === tactic
     );
 
@@ -432,11 +407,11 @@ GM_addStyle(
     };
 
     saveTacticToStorage(tactic).catch(console.error);
-    addTacticsToDropdown(tacticsDropdownMenu, [tactic]);
-    dropdownTactics.push(tactic);
+    addTacticsToDropdownMenu(tacticsDropdownMenu, [tactic]);
+    dropdownMenuTactics.push(tactic);
 
     tacticsDropdownMenu.value = tactic.name;
-    handleTacticSelection(tactic.name);
+    handleTacticsSelection(tactic.name);
 
     alert(strings.addAlert.replace("{}", tactic.name));
   }
@@ -505,7 +480,7 @@ GM_addStyle(
       "tactics_dropdown_menu"
     );
 
-    const selectedTactic = dropdownTactics.find(
+    const selectedTactic = dropdownMenuTactics.find(
       (tactic) => tactic.name === tacticsDropdownMenu.value
     );
 
@@ -529,7 +504,7 @@ GM_addStyle(
 
     await GM_setValue("ls_tactics", tacticsData);
 
-    dropdownTactics = dropdownTactics.filter(
+    dropdownMenuTactics = dropdownMenuTactics.filter(
       (tactic) => tactic.id !== selectedTactic.id
     );
 
@@ -563,7 +538,7 @@ GM_addStyle(
       "tactics_dropdown_menu"
     );
 
-    const selectedTactic = dropdownTactics.find(
+    const selectedTactic = dropdownMenuTactics.find(
       (tactic) => tactic.name === tacticsDropdownMenu.value
     );
 
@@ -594,7 +569,7 @@ GM_addStyle(
 
     await GM_setValue("ls_tactics", tacticsData);
 
-    dropdownTactics = dropdownTactics.map((tactic) => {
+    dropdownMenuTactics = dropdownMenuTactics.map((tactic) => {
       if (tactic.id === selectedTactic.id) {
         tactic.name = newName;
       }
@@ -630,7 +605,7 @@ GM_addStyle(
       "tactics_dropdown_menu"
     );
 
-    const selectedTactic = dropdownTactics.find(
+    const selectedTactic = dropdownMenuTactics.find(
       (tactic) => tactic.name === tacticsDropdownMenu.value
     );
 
@@ -680,7 +655,7 @@ GM_addStyle(
       }
     }
 
-    for (const tactic of dropdownTactics) {
+    for (const tactic of dropdownMenuTactics) {
       if (tactic.id === selectedTactic.id) {
         tactic.coordinates = updatedCoordinates;
         tactic.id = newId;
@@ -727,7 +702,7 @@ GM_addStyle(
     }
 
     await GM_setValue("ls_tactics", { tactics: [] });
-    dropdownTactics = [];
+    dropdownMenuTactics = [];
 
     const tacticsDropdownMenu = document.getElementById(
       "tactics_dropdown_menu"
@@ -763,14 +738,14 @@ GM_addStyle(
     const defaultTactics = data.tactics;
 
     await GM_setValue("ls_tactics", { tactics: defaultTactics });
-    dropdownTactics = defaultTactics;
+    dropdownMenuTactics = defaultTactics;
 
     const tacticsDropdownMenu = document.getElementById(
       "tactics_dropdown_menu"
     );
     tacticsDropdownMenu.innerHTML = "";
     tacticsDropdownMenu.appendChild(createPlaceholderOption());
-    addTacticsToDropdown(tacticsDropdownMenu, dropdownTactics);
+    addTacticsToDropdownMenu(tacticsDropdownMenu, dropdownMenuTactics);
     tacticsDropdownMenu.disabled = false;
 
     alert(strings.resetAlert);
@@ -823,14 +798,14 @@ GM_addStyle(
         await GM_setValue("ls_tactics", { tactics: mergedTactics });
 
         mergedTactics.sort((a, b) => a.name.localeCompare(b.name));
-        dropdownTactics = mergedTactics;
+        dropdownMenuTactics = mergedTactics;
 
         const tacticsDropdownMenu = document.getElementById(
           "tactics_dropdown_menu"
         );
         tacticsDropdownMenu.innerHTML = "";
         tacticsDropdownMenu.append(createPlaceholderOption());
-        addTacticsToDropdown(tacticsDropdownMenu, dropdownTactics);
+        addTacticsToDropdownMenu(tacticsDropdownMenu, dropdownMenuTactics);
         tacticsDropdownMenu.disabled = false;
       };
 
@@ -955,6 +930,27 @@ GM_addStyle(
     });
   }
 
+  // _____Audio button_____
+
+  function createAudioButton() {
+    const button = document.createElement("button");
+    setupButton(button, "audio_button", "🔊");
+
+    const audio = new Audio(
+      "https://ia802609.us.archive.org/16/items/w-w-w-d-e-e-p-d-i-v-e-c-o-m-wg7bkk/Webinar%E2%84%A2%20-%20w%20w%20w%20.%20d%20e%20e%20p%20d%20i%20v%20e%20.%20c%20o%20m%20-%2002%20%E6%B3%A2.mp3"
+    );
+    audio.loop = true;
+
+    button.addEventListener("click", function () {
+      toggleAudio(audio);
+    });
+
+    return button;
+  }
+
+  function toggleAudio(audio) {
+    audio.paused ? audio.play() : audio.pause();
+  }
 
   function setupModal(modal, id) {
     modal.id = id;
@@ -1028,16 +1024,6 @@ GM_addStyle(
     return dropdown;
   }
 
-  function createLanguageDropdownMenuLabel() {
-    const label = document.createElement("span");
-    setupDropdownMenuLabel(
-      label,
-      "language_dropdown_menu_label",
-      strings.languageDropdownMenuLabel
-    );
-    return label;
-  }
-
   async function changeLanguage(languageCode) {
     try {
       const translationDataUrl = `https://raw.githubusercontent.com/douglasdotv/tactics-selector/main/json/lang/${languageCode}.json?callback=?`;
@@ -1061,35 +1047,18 @@ GM_addStyle(
   }
 
   function updateTranslation() {
-    for (let key in strings) {
+    for (const key in strings) {
       strings[key] = i18next.t(key);
     }
 
-    document.getElementById("add_tactic_button").textContent =
-      strings.addButton;
-    document.getElementById("delete_tactic_button").textContent =
-      strings.deleteButton;
-    document.getElementById("rename_tactic_button").textContent =
-      strings.renameButton;
-    document.getElementById("update_tactic_button").textContent =
-      strings.updateButton;
-    document.getElementById("clear_tactics_button").textContent =
-      strings.clearButton;
-    document.getElementById("reset_tactics_button").textContent =
-      strings.resetButton;
-    document.getElementById("import_tactics_button").textContent =
-      strings.importButton;
-    document.getElementById("export_tactics_button").textContent =
-      strings.exportButton;
-    document.getElementById("tactics_dropdown_menu_label").textContent =
-      strings.tacticsDropdownMenuLabel;
-    document.getElementById("language_dropdown_menu_label").textContent =
-      strings.languageDropdownMenuLabel;
-    document.getElementById("info_modal_info_text").innerHTML =
-      strings.modalContentInfoText;
-    document.getElementById("info_modal_feedback_text").innerHTML =
-      strings.modalContentFeedbackText;
-    document.getElementById("about_button").textContent = strings.aboutButton;
+    for (const id in elementStringKeys) {
+      const element = document.getElementById(id);
+      if (id === "info_modal_info_text" || id === "info_modal_feedback_text") {
+        element.innerHTML = strings[elementStringKeys[id]];
+      } else {
+        element.textContent = strings[elementStringKeys[id]];
+      }
+    }
   }
 
   function getActiveLanguage() {
@@ -1159,13 +1128,13 @@ GM_addStyle(
     element.parentNode.insertBefore(something, element.nextSibling);
   }
 
-  function createMainDiv() {
+  function createTacticsSelectorDiv() {
     const div = document.createElement("div");
-    setupMainDiv(div);
+    setupTacticsSelectorDiv(div);
     return div;
   }
 
-  function setupMainDiv(div) {
+  function setupTacticsSelectorDiv(div) {
     div.id = "tactics_selector_div";
     div.style.width = "100%";
     div.style.display = "flex";
@@ -1175,23 +1144,79 @@ GM_addStyle(
     div.style.marginLeft = "6px";
   }
 
-  function createMainDivFirstRow() {
+  function createRow(id) {
     const row = document.createElement("div");
-    row.id = "tactics_selector_div_first_row";
-    row.style.display = "flex";
-    row.style.justifyContent = "space-between";
-    row.style.flexWrap = "wrap";
-    row.style.width = "75%";
-    return row;
-  }
-
-  function createMainDivSecondRow() {
-    const row = document.createElement("div");
-    row.id = "tactics_selector_div_second_row";
+    row.id = id;
     row.style.display = "flex";
     row.style.justifyContent = "flex-start";
     row.style.flexWrap = "wrap";
+    row.style.width = "96%";
     return row;
+  }
+
+  function setupFirstRow() {
+    const firstRow = document.getElementById("tactics_selector_div_first_row");
+    firstRow.style.display = "flex";
+    firstRow.style.justifyContent = "space-between";
+    firstRow.style.width = "77%";
+
+    const tacticsDropdownMenuLabel = createDropdownMenuLabel(
+      "tactics_dropdown_menu_label"
+    );
+    const tacticsDropdownMenu = createTacticsDropdownMenu();
+    const tacticsDropdownGroup = createLabelDropdownMenuGroup(
+      tacticsDropdownMenuLabel,
+      tacticsDropdownMenu
+    );
+
+    const languageDropdownMenuLabel = createDropdownMenuLabel(
+      "language_dropdown_menu_label"
+    );
+    const languageDropdownMenu = createLanguageDropdownMenu();
+    const languageDropdownGroup = createLabelDropdownMenuGroup(
+      languageDropdownMenuLabel,
+      languageDropdownMenu
+    );
+
+    appendChildren(firstRow, [tacticsDropdownGroup, languageDropdownGroup]);
+
+    appendChildren(languageDropdownGroup, [createFlagImage()]);
+  }
+
+  function setupSecondRow() {
+    const secondRow = document.getElementById(
+      "tactics_selector_div_second_row"
+    );
+
+    const addNewTacticBtn = createAddNewTacticButton();
+    const deleteTacticBtn = createDeleteTacticButton();
+    const renameTacticBtn = createRenameTacticButton();
+    const updateTacticBtn = createUpdateTacticButton();
+    const clearTacticsBtn = createClearTacticsButton();
+    const resetTacticsBtn = createResetTacticsButton();
+    const importTacticsBtn = createImportTacticsButton();
+    const exportTacticsBtn = createExportTacticsButton();
+    const aboutBtn = createAboutButton();
+    const audioBtn = createAudioButton();
+
+    appendChildren(secondRow, [
+      addNewTacticBtn,
+      deleteTacticBtn,
+      renameTacticBtn,
+      updateTacticBtn,
+      clearTacticsBtn,
+      resetTacticsBtn,
+      importTacticsBtn,
+      exportTacticsBtn,
+      aboutBtn,
+      audioBtn,
+    ]);
+  }
+
+  function createDropdownMenuLabel(labelId) {
+    const label = document.createElement("span");
+    setupDropdownMenuLabel(label, labelId, strings.languageDropdownMenuLabel);
+    return label;
   }
 
   function createLabelDropdownMenuGroup(label, dropdown) {
@@ -1206,23 +1231,38 @@ GM_addStyle(
     dropdown.id = id;
     dropdown.style.fontSize = "12px";
     dropdown.style.fontFamily = "Montserrat, sans-serif";
-    dropdown.style.border = "2px solid #000";
-    dropdown.style.borderRadius = "2px";
-    dropdown.style.background = "linear-gradient(to right, #add8e6, #e6f7ff)";
-    dropdown.style.color = "#000";
-    dropdown.style.boxShadow = "3px 3px 5px rgba(0, 0, 0, 0.2)";
-    dropdown.style.cursor = "pointer";
-    dropdown.style.outline = "none";
+    dropdown.style.border = "none";
+    dropdown.style.borderRadius = "6px";
+    dropdown.style.backgroundColor = "#11112e";
+    dropdown.style.color = "#e5e4e2";
+    dropdown.style.padding = "3px 6px";
     dropdown.style.margin = "6px 0 6px 6px";
+    dropdown.style.cursor = "pointer";
+    dropdown.style.boxShadow = "0 2px 4px rgba(0, 0, 0, 0.2)";
+    dropdown.style.outline = "none";
+    dropdown.style.transition = "background-color 0.3s";
+
+    dropdown.onmouseover = function () {
+      dropdown.style.backgroundColor = "#334d77";
+    };
+    dropdown.onmouseout = function () {
+      dropdown.style.backgroundColor = "#11112e";
+    };
+    dropdown.onfocus = function () {
+      dropdown.style.outline = "2px solid #334d77";
+    };
+    dropdown.onblur = function () {
+      dropdown.style.outline = "none";
+    };
   }
 
   function setupDropdownMenuLabel(description, id, textContent) {
     description.id = id;
     description.textContent = textContent;
     description.style.fontFamily = "Montserrat, sans-serif";
-    description.style.fontSize = "12px";
-    description.style.color = "#000";
-    description.style.margin = "6px 0 6px 6px";
+    description.style.fontSize = "13px";
+    description.style.color = "#11112e";
+    description.style.margin = "6px 0 12px 6px";
   }
 
   function setupButton(button, id, textContent) {
@@ -1230,11 +1270,32 @@ GM_addStyle(
     button.textContent = textContent;
     button.style.fontFamily = "Montserrat, sans-serif";
     button.style.fontSize = "12px";
-    button.style.color = "#000";
+    button.style.color = "#e5e4e2";
+    button.style.backgroundColor = "#11112e";
+    button.style.padding = "4px 8px";
     button.style.marginLeft = "6px";
     button.style.marginTop = "6px";
     button.style.cursor = "pointer";
-    button.style.boxShadow = "3px 3px 5px rgba(0, 0, 0, 0.2)";
+    button.style.border = "none";
+    button.style.borderRadius = "6px";
+    button.style.boxShadow = "0 2px 4px rgba(0, 0, 0, 0.2)";
+    button.style.fontWeight = "500";
+    button.style.transition = "background-color 0.3s, transform 0.3s";
+
+    button.onmouseover = function () {
+      button.style.backgroundColor = "#334d77";
+      button.style.transform = "scale(1.05)";
+    };
+    button.onmouseout = function () {
+      button.style.backgroundColor = "#11112e";
+      button.style.transform = "scale(1)";
+    };
+    button.onfocus = function () {
+      button.style.outline = "2px solid #334d77";
+    };
+    button.onblur = function () {
+      button.style.outline = "none";
+    };
   }
 
   function createPlaceholderOption() {
