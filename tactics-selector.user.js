@@ -930,28 +930,7 @@ GM_addStyle(
     });
   }
 
-  // _____Audio button_____
-
-  function createAudioButton() {
-    const button = document.createElement("button");
-    setupButton(button, "audio_button", "🔊");
-
-    const audio = new Audio(
-      "https://ia802609.us.archive.org/16/items/w-w-w-d-e-e-p-d-i-v-e-c-o-m-wg7bkk/Webinar%E2%84%A2%20-%20w%20w%20w%20.%20d%20e%20e%20p%20d%20i%20v%20e%20.%20c%20o%20m%20-%2002%20%E6%B3%A2.mp3"
-    );
-    audio.loop = true;
-
-    button.addEventListener("click", function () {
-      toggleAudio(audio);
-    });
-
-    return button;
-  }
-
-  function toggleAudio(audio) {
-    audio.paused ? audio.play() : audio.pause();
-  }
-
+  
   function setupModal(modal, id) {
     modal.id = id;
     modal.style.display = "none";
@@ -981,24 +960,70 @@ GM_addStyle(
 
   // _____Audio button_____
 
-  function createAudioButton() {
+  const createAudioButton = () => {
     const button = document.createElement("button");
-    setupButton(button, "audio_button", "♫");
+    setupButton(button, "audio_button", "🔊");
 
-    const audio = new Audio(
-      "https://ia802609.us.archive.org/16/items/w-w-w-d-e-e-p-d-i-v-e-c-o-m-wg7bkk/Webinar%E2%84%A2%20-%20w%20w%20w%20.%20d%20e%20e%20p%20d%20i%20v%20e%20.%20c%20o%20m%20-%2002%20%E6%B3%A2.mp3"
-    );
-    audio.loop = true;
+    const audioUrls = [
+        "https://ia802609.us.archive.org/16/items/w-w-w-d-e-e-p-d-i-v-e-c-o-m-wg7bkk/Webinar%E2%84%A2%20-%20w%20w%20w%20.%20d%20e%20e%20p%20d%20i%20v%20e%20.%20c%20o%20m%20-%2005%20URL%20%E6%B9%96.mp3",
+        "https://ia802306.us.archive.org/15/items/remember-this-night-w6kvvl/COSMIC%20CYCLER%20-%20Remember%20This%20Night%20-%2009%20Night%20Breeze.mp3",
+        "https://ia802300.us.archive.org/32/items/01.-dj-mixed-by-atsushi-ohara/Ridge%20Racer%20Soundtrack%20Collection/2006%20-%20Ridge%20Racers%202%20Direct%20Audio/11.%20Quiet%20Curves.mp3",
+        "https://ia801701.us.archive.org/18/items/architectureintokyo-singles2013-2018/architecture%20in%20tokyo%20-%20singles%20%282013-2018%29%20-%2005%20marble%20%28ft.%20ULTRA%20%E3%82%A6%E3%83%AB%E3%83%88%E3%83%A9%29.mp3",
+        "https://ia802306.us.archive.org/28/items/remember-this-night-w9vygv/COSMIC%20CYCLER%20-%20Remember%20This%20Night%20-%2006%20Living%20in%20Your%20Eyes.mp3",
+        "https://ia801403.us.archive.org/24/items/ElisTom1AguasDeMarco/ElisTom1Aguas%20de%20marco.mp3",
+        "https://ia800103.us.archive.org/18/items/azzahradibaku_gmail_Gana/Elis%20Regina%20e%20Adoniran%20Barbosa%20-%20Tiro%20ao%20%C3%81lvaro.mp3",
+        "https://ia601404.us.archive.org/29/items/flying-beagle/The%20Second%20Summer.mp3",
+        "https://ia801001.us.archive.org/25/items/101AirLaFemmeDargent/108-air_-_ce_matin_la.mp3",
+        "https://ia804500.us.archive.org/7/items/special-night-w9vkyb/Cosmic%20Cycler%20-%20Special%20Night%20-%2003%20Trying%20to%20Relax.mp3",
+    ];
+
+    const audios = audioUrls.map(url => new Audio(url));
+
+    let isPlaying = false;
+    let currentAudio = null;
 
     button.addEventListener("click", function () {
-      toggleAudio(audio);
+        if (!isPlaying) {
+            currentAudio = playRandomAudio(audios);
+            isPlaying = true;
+        } else {
+            pauseAudio(currentAudio);
+            isPlaying = false;
+        }
+        updateAudioIcon(button, isPlaying);
     });
 
     return button;
+}
+
+  const playRandomAudio = (audios) => {
+    if (audios.length === 0) {
+        return;
+    }
+
+    const randomIdx = Math.floor(Math.random() * audios.length);
+    const activeAudio = audios.splice(randomIdx, 1)[0];
+
+    playAudio(activeAudio, audios);
+    return activeAudio;
   }
 
-  function toggleAudio(audio) {
-    audio.paused ? audio.play() : audio.pause();
+  const playAudio = (currAudio, audios) => {
+    currAudio.play();
+    currAudio.onended = function() {
+        playRandomAudio(audios);
+    };
+  }
+
+  const pauseAudio = (audio) => {
+    if (audio) {
+        audio.pause();
+        audio.currentTime = 0;
+    }
+  }
+
+  const updateAudioIcon = (button, isPlaying) => {
+    button.textContent = isPlaying ? "⏸️" : "🔊";
   }
 
   // _____Language Dropdown Menu_____
