@@ -7,16 +7,16 @@ This is a UserScript designed specifically for the game [ManagerZone](https://ww
 ## Features
 
 ### Tactics Management
-The script provides comprehensive tactics management capabilities. You can:
+The userscript provides the following features:
 
-- **Add Tactics**: create new tactics and add them to the dropdown menu.
+- **Add Tactics**: come up with your own tactics and add them to the dropdown menu.
 - **Delete Tactics**: remove tactics that you no longer need.
-- **Rename Tactics**: update the names of your tactics for better organization.
-- **Update Tactics**: modify an already existing tactic arrangement.
-- **Clear Tactics**: remove all tactics the dropdown menu.
-- **Reset Tactics**: reset to default settings (fetch default tactics).
+- **Rename Tactics**: update existing tactic names.
+- **Update Tactics**: modify the (x, y) coordinates of an already existing tactic.
+- **Clear Tactics**: remove all tactics from the dropdown menu.
+- **Reset Tactics**: reset to default settings (fetches default tactics).
 - **Export Tactics**: export the list of tactics into a json file (in case you want to share or reuse them in another browser or device, for example).
-- **Import Tactics**: import a json file containing tactics (see export tactics feature).
+- **Import Tactics**: import a json file containing tactics (goes hand in hand with export tactics feature).
 
 Each tactic is characterized by a name, an unique id and a set of coordinates.
 
