@@ -28,5 +28,7 @@
   "modalContentInfoText": "So verwenden Sie es: <br><a href='https://youtu.be/SgjKdgA6cvE' style='color: #007BFF;'>https://youtu.be/SgjKdgA6cvE</a><br>Userscript-Seite auf Greasy Fork: <br><a href='https://greasyfork.org/de/scripts/467712-mz-tactics-selector' style='color: #007BFF;'>https://greasyfork.org/de/scripts/467712-mz-tactics-selector</a>",
   "modalContentFeedbackText": "Wenn Sie Probleme haben oder Vorschläge haben, können Sie mich hier kontaktieren: <a href=\"https://www.managerzone.com/?p=guestbook&uid=8577497\"><img src=\"https://www.managerzone.com/img/soccer/reply_guestbook.gif\"></a>",
   "tacticsDropdownMenuLabel": "Wählen Sie eine Taktik aus: ",
-  "languageDropdownMenuLabel": "Sprache: "
+  "languageDropdownMenuLabel": "Sprache: ",
+  "usefulLinksButton": "Nützliche Links",
+  "usefulContent": "Entdecken Sie diese Ressourcen für Tipps, Diskussionen und Einblicke in Taktiken: "
 }

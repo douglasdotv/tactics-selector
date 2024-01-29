@@ -28,5 +28,7 @@
   "modalContentInfoText": "Cara menggunakan: <br><a href='https://youtu.be/SgjKdgA6cvE' style='color: #007BFF;'>https://youtu.be/SgjKdgA6cvE</a><br>Halaman userscript di Greasy Fork: <br><a href='https://greasyfork.org/id/scripts/467712-mz-tactics-selector' style='color: #007BFF;'>https://greasyfork.org/id/scripts/467712-mz-tactics-selector</a>",
   "modalContentFeedbackText": "Jika Anda mengalami masalah atau memiliki saran, jangan ragu untuk menghubungi saya di sini: <a href=\"https://www.managerzone.com/?p=guestbook&uid=8577497\"><img src=\"https://www.managerzone.com/img/soccer/reply_guestbook.gif\"></a>",
   "tacticsDropdownMenuLabel": "Pilih taktik: ",
-  "languageDropdownMenuLabel": "Bahasa: "
+  "languageDropdownMenuLabel": "Bahasa: ",
+  "usefulLinksButton": "Tautan Berguna",
+  "usefulContent": "Jelajahi sumber daya ini untuk tips, diskusi, dan wawasan tentang taktik: "
 }
