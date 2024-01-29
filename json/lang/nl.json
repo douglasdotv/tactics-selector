@@ -25,7 +25,7 @@
   "tacticNameMaxLengthError": "Fout: De tactieknaam mag niet langer zijn dan 50 tekens.",
   "noTacticSelectedError": "Fout: Geen tactiek geselecteerd.",
   "duplicateTacticError": "Fout: Er bestaat al een tactiek met exact dezelfde coördinaten.",
-  "modalContentInfoText": "Voor meer informatie, klik <a href=\"https://greasyfork.org/pt-BR/scripts/467712-mz-tactics-selector\" style=\"color: #007BFF;\">hier</a>.",
+  "modalContentInfoText": "Hoe te gebruiken: <br><a href='https://youtu.be/SgjKdgA6cvE' style='color: #007BFF;'>https://youtu.be/SgjKdgA6cvE</a><br>Userscript pagina op Greasy Fork: <br><a href='https://greasyfork.org/nl/scripts/467712-mz-tactics-selector' style='color: #007BFF;'>https://greasyfork.org/nl/scripts/467712-mz-tactics-selector</a>",
   "modalContentFeedbackText": "Als je problemen ondervindt of suggesties hebt, neem dan gerust contact met me op via <a href=\"https://www.managerzone.com/?p=guestbook&uid=8577497\"><img src=\"https://www.managerzone.com/img/soccer/reply_guestbook.gif\"></a>",
   "tacticsDropdownMenuLabel": "Selecteer een tactiek: ",
   "languageDropdownMenuLabel": "Taal: "
