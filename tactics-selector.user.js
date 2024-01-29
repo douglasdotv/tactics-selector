@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
-// @version      7.2
+// @version      7.3
 // @description  Adds a dropdown menu with overused tactics and lets you save your own tactics for quick access later on.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
@@ -81,6 +81,7 @@ GM_addStyle(
     resetButton: "",
     importButton: "",
     exportButton: "",
+    usefulLinksButton: "",
     aboutButton: "",
     tacticNamePrompt: "",
     addAlert: "",
@@ -101,6 +102,7 @@ GM_addStyle(
     duplicateTacticError: "",
     modalContentInfoText: "",
     modalContentFeedbackText: "",
+    usefulContent: "",
     tacticsDropdownMenuLabel: "",
     languageDropdownMenuLabel: "",
   };
@@ -119,9 +121,12 @@ GM_addStyle(
     language_dropdown_menu_label: "languageDropdownMenuLabel",
     info_modal_info_text: "modalContentInfoText",
     info_modal_feedback_text: "modalContentFeedbackText",
+    useful_links_button: "usefulLinksButton",
+    useful_content: "usefulContent",
   };
 
   let infoModal;
+  let usefulLinksModal;
 
   const tacticsBox = document.getElementById("tactics_box");
 
@@ -199,7 +204,7 @@ GM_addStyle(
             .catch((err) => {
               console.error("Couldn't fetch data from json: ", err);
             });
-          setInfoModal();
+          setModals();
           updateTranslation();
         });
     }
@@ -829,6 +834,77 @@ GM_addStyle(
     URL.revokeObjectURL(url);
   }
 
+  // _____Useful Links Button_____
+
+  function createUsefulLinksButton() {
+    const button = document.createElement("button");
+    setupButton(button, "useful_links_button", strings.usefulLinksButton);
+
+    button.addEventListener("click", function (event) {
+      event.stopPropagation();
+      toggleModal(usefulLinksModal);
+    });
+
+    return button;
+  }
+
+  function createUsefulLinksModal() {
+    const modal = document.createElement("div");
+    setupModal(modal, "useful_links_modal");
+
+    const modalContent = createUsefulLinksModalContent();
+    modal.appendChild(modalContent);
+
+    return modal;
+  }
+
+  function createUsefulLinksModalContent() {
+    const modalContent = document.createElement("div");
+    styleModalContent(modalContent);
+
+    const usefulContent = createUsefulContent();
+
+    const hrefs = new Map([
+      ["gewlaht - BoooM", "https://www.managerzone.com/?p=forum&sub=topic&topic_id=11415137&forum_id=49&sport=soccer"],
+      ["honken91 - taktikskola", "https://www.managerzone.com/?p=forum&sub=topic&topic_id=12653892&forum_id=4&sport=soccer"],
+      ["peto - mix de dibujos", "https://www.managerzone.com/?p=forum&sub=topic&topic_id=12196312&forum_id=255&sport=soccer"],
+      ["The Zone Chile", "https://www.managerzone.com/thezone/paper.php?paper_id=18036&page=9&sport=soccer"],
+    ]);
+    const usefulLinksList = createLinksList(hrefs);
+
+    modalContent.appendChild(usefulContent);
+    modalContent.appendChild(usefulLinksList);
+
+    return modalContent;
+  }
+
+  function createUsefulContent() {
+    const usefulContent = document.createElement("p");
+    usefulContent.id = "useful_content";
+    usefulContent.textContent = strings.usefulContent;
+    return usefulContent;
+  }
+
+  function createLinksList(hrefs) {
+    const list = document.createElement("ul");
+
+    hrefs.forEach((href, title) => {
+        const listItem = document.createElement("li");
+        const link = document.createElement("a");
+        link.href = href;
+        link.textContent = title;
+        listItem.appendChild(link);
+        list.appendChild(listItem);
+    });
+
+    return list;
+  }
+
+  function setUsefulLinksModal() {
+    usefulLinksModal = createUsefulLinksModal();
+    document.body.appendChild(usefulLinksModal);
+  }
+
   // _____About button_____
 
   function createAboutButton() {
@@ -837,12 +913,7 @@ GM_addStyle(
 
     button.addEventListener("click", function (event) {
       event.stopPropagation();
-      if (
-        infoModal.style.display === "none" ||
-        infoModal.style.opacity === "0"
-      ) {
-        showInfo();
-      }
+      toggleModal(infoModal);
     });
 
     return button;
@@ -854,12 +925,6 @@ GM_addStyle(
 
     const modalContent = createModalContent();
     modal.appendChild(modalContent);
-
-    window.onclick = function (event) {
-      if (event.target == modal) {
-        hideInfo();
-      }
-    };
 
     return modal;
   }
@@ -903,59 +968,9 @@ GM_addStyle(
     return feedbackText;
   }
 
-  function showInfo() {
-    infoModal.style.display = "block";
-    setTimeout(function () {
-      infoModal.style.opacity = "1";
-    }, 0);
-  }
-
-  function hideInfo() {
-    infoModal.style.opacity = "0";
-    setTimeout(function () {
-      infoModal.style.display = "none";
-    }, 500);
-  }
-
   function setInfoModal() {
     infoModal = createInfoModal();
     document.body.appendChild(infoModal);
-    document.addEventListener("click", function (event) {
-      if (
-        infoModal.style.display === "block" &&
-        !infoModal.contains(event.target)
-      ) {
-        infoModal.style.display = "none";
-      }
-    });
-  }
-
-  
-  function setupModal(modal, id) {
-    modal.id = id;
-    modal.style.display = "none";
-    modal.style.position = "fixed";
-    modal.style.zIndex = "1";
-    modal.style.left = "50%";
-    modal.style.top = "50%";
-    modal.style.transform = "translate(-50%, -50%)";
-    modal.style.opacity = "0";
-    modal.style.transition = "opacity 0.5s ease-in-out";
-  }
-
-  function styleModalContent(content) {
-    content.style.backgroundColor = "#fefefe";
-    content.style.margin = "auto";
-    content.style.padding = "20px";
-    content.style.border = "1px solid #888";
-    content.style.width = "80%";
-    content.style.maxWidth = "500px";
-    content.style.borderRadius = "10px";
-    content.style.fontFamily = "Montserrat, sans-serif";
-    content.style.textAlign = "center";
-    content.style.color = "#000";
-    content.style.fontSize = "16px";
-    content.style.lineHeight = "1.5";
   }
 
   // _____Audio button_____
@@ -1221,6 +1236,7 @@ GM_addStyle(
     const resetTacticsBtn = createResetTacticsButton();
     const importTacticsBtn = createImportTacticsButton();
     const exportTacticsBtn = createExportTacticsButton();
+    const usefulLinksBtn = createUsefulLinksButton();
     const aboutBtn = createAboutButton();
     const audioBtn = createAudioButton();
 
@@ -1233,6 +1249,7 @@ GM_addStyle(
       resetTacticsBtn,
       importTacticsBtn,
       exportTacticsBtn,
+      usefulLinksBtn,
       aboutBtn,
       audioBtn,
     ]);
@@ -1321,6 +1338,72 @@ GM_addStyle(
     button.onblur = function () {
       button.style.outline = "none";
     };
+  }
+
+  function setModals() {
+    setInfoModal();
+    setUsefulLinksModal();
+    setupModalsWindowClickListener();
+  }
+
+  function setupModalsWindowClickListener() {
+    window.addEventListener("click", function (event) {
+        if (usefulLinksModal.style.display === "block" && !usefulLinksModal.contains(event.target)) {
+            hideModal(usefulLinksModal);
+        }
+        if (infoModal.style.display === "block" && !infoModal.contains(event.target)) {
+            hideModal(infoModal);
+        }
+    });
+  }
+
+  function toggleModal(modal) {
+    if (modal.style.display === "none" || modal.style.opacity === "0") {
+      showModal(modal);
+    } else {
+      hideModal(modal);
+    }
+  }
+  
+  function showModal(modal) {
+    modal.style.display = "block";
+    setTimeout(function () {
+      modal.style.opacity = "1";
+    }, 0);
+  }
+
+  function hideModal(modal) {
+    modal.style.opacity = "0";
+    setTimeout(function () {
+      modal.style.display = "none";
+    }, 500);
+  }
+  
+  function setupModal(modal, id) {
+    modal.id = id;
+    modal.style.display = "none";
+    modal.style.position = "fixed";
+    modal.style.zIndex = "1";
+    modal.style.left = "50%";
+    modal.style.top = "50%";
+    modal.style.transform = "translate(-50%, -50%)";
+    modal.style.opacity = "0";
+    modal.style.transition = "opacity 0.5s ease-in-out";
+  }
+
+  function styleModalContent(content) {
+    content.style.backgroundColor = "#fefefe";
+    content.style.margin = "auto";
+    content.style.padding = "20px";
+    content.style.border = "1px solid #888";
+    content.style.width = "80%";
+    content.style.maxWidth = "500px";
+    content.style.borderRadius = "10px";
+    content.style.fontFamily = "Montserrat, sans-serif";
+    content.style.textAlign = "center";
+    content.style.color = "#000";
+    content.style.fontSize = "16px";
+    content.style.lineHeight = "1.5";
   }
 
   function createPlaceholderOption() {
