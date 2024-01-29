@@ -28,5 +28,7 @@
   "modalContentInfoText": "사용 방법: <br><a href='https://youtu.be/SgjKdgA6cvE' style='color: #007BFF;'>https://youtu.be/SgjKdgA6cvE</a><br>Greasy Fork의 userscript 페이지: <br><a href='https://greasyfork.org/ko/scripts/467712-mz-tactics-selector' style='color: #007BFF;'>https://greasyfork.org/ko/scripts/467712-mz-tactics-selector</a>",
   "modalContentFeedbackText": "문제가 발생하거나 제안사항이 있으시면, 여기로 연락하실 수 있습니다: <a href=\"https://www.managerzone.com/?p=guestbook&uid=8577497\"><img src=\"https://www.managerzone.com/img/soccer/reply_guestbook.gif\"></a>",
   "tacticsDropdownMenuLabel": "전략 선택: ",
-  "languageDropdownMenuLabel": "언어: "
+  "languageDropdownMenuLabel": "언어: ",
+  "usefulLinksButton": "유용한 링크",
+  "usefulContent": "전술에 관한 팁, 토론 및 통찰을 위해 이러한 자원을 탐색하십시오: "
 }
