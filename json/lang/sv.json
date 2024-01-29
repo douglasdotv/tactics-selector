@@ -25,7 +25,7 @@
   "tacticNameMaxLengthError": "Fel: Taktikens namn får inte vara längre än 50 tecken.",
   "noTacticSelectedError": "Fel: Ingen taktik vald.",
   "duplicateTacticError": "Fel: En taktik med exakt samma koordinater finns redan.",
-  "modalContentInfoText": "För mer information, klicka <a href=\"https://greasyfork.org/pt-BR/scripts/467712-mz-tactics-selector\" style=\"color: #007BFF;\">här</a>.",
+  "modalContentInfoText": "Hur man använder: <br><a href='https://youtu.be/SgjKdgA6cvE' style='color: #007BFF;'>https://youtu.be/SgjKdgA6cvE</a><br>Userscript-sida på Greasy Fork: <br><a href='https://greasyfork.org/sv/scripts/467712-mz-tactics-selector' style='color: #007BFF;'>https://greasyfork.org/sv/scripts/467712-mz-tactics-selector</a>",
   "modalContentFeedbackText": "Om du stöter på problem eller har några förslag, kontakta mig gärna här: <a href=\"https://www.managerzone.com/?p=guestbook&uid=8577497\"><img src=\"https://www.managerzone.com/img/soccer/reply_guestbook.gif\"></a>",
   "tacticsDropdownMenuLabel": "Välj en taktik: ",
   "languageDropdownMenuLabel": "Språk: "

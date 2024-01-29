@@ -25,7 +25,7 @@
   "tacticNameMaxLengthError": "Erreur : le nom de la tactique doit comporter moins de 50 caractères.",
   "noTacticSelectedError": "Erreur : aucune tactique sélectionnée.",
   "alreadyExistingTacticIdError": "Erreur : une tactique avec les mêmes coordonnées existe déjà.",
-  "modalContentInfoText": "Pour plus d'informations, cliquez <a href=\"https://greasyfork.org/pt-BR/scripts/467712-mz-tactics-selector\" style=\"color: #007BFF;\">ici</a>.",
+  "modalContentInfoText": "Comment utiliser : <br><a href='https://youtu.be/SgjKdgA6cvE' style='color: #007BFF;'>https://youtu.be/SgjKdgA6cvE</a><br>Page du userscript sur Greasy Fork: <br><a href='https://greasyfork.org/fr/scripts/467712-mz-tactics-selector' style='color: #007BFF;'>https://greasyfork.org/fr/scripts/467712-mz-tactics-selector</a>",
   "modalContentFeedbackText": "Si vous rencontrez des problèmes ou avez des suggestions, n'hésitez pas à me contacter ici: <a href=\"https://www.managerzone.com/?p=guestbook&uid=8577497\"><img src=\"https://www.managerzone.com/img/soccer/reply_guestbook.gif\"></a>",
   "tacticsDropdownMenuLabel": "Sélectionnez une tactique: ",
   "languageDropdownMenuLabel": "Langue: "
