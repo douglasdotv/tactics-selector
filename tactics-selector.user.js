@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
-// @version      7.3
+// @version      7.4
 // @description  Adds a dropdown menu with overused tactics and lets you save your own tactics for quick access later on.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
@@ -13,6 +13,7 @@
 // @grant        GM_addStyle
 // @require      https://unpkg.com/jssha@3.3.0/dist/sha256.js
 // @require      https://unpkg.com/i18next@21.6.3/i18next.min.js
+// @require      https://cdn.jsdelivr.net/npm/sweetalert2@11
 // @license      MIT
 // ==/UserScript==
 
@@ -395,13 +396,31 @@ GM_addStyle(
     const tacticId = generateUniqueId(tacticCoordinates);
     const isDuplicate = await validateDuplicateTactic(tacticId);
     if (isDuplicate) {
-      alert(strings.duplicateTacticError);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: strings.duplicateTacticError,
+      });
       return;
     }
 
-    const tacticName = prompt(strings.tacticNamePrompt);
-    const isValidName = await validateTacticName(tacticName);
-    if (!isValidName) {
+    const tacticName = await Swal.fire({
+      title: strings.tacticNamePrompt,
+      input: 'text',
+      inputValidator: (value) => {
+        if (!value) {
+          return strings.noTacticNameProvidedError;
+        }
+        if (value.length > maxTacticNameLength) {
+          return strings.tacticNameLengthError;
+        }
+        if (dropdownMenuTactics.some((t) => t.name === value)) {
+          return strings.alreadyExistingTacticNameError;
+        }
+      },
+    }).then((result) => result.value);
+
+    if (!tacticName) {
       return;
     }
 
@@ -418,7 +437,11 @@ GM_addStyle(
     tacticsDropdownMenu.value = tactic.name;
     handleTacticsSelection(tactic.name);
 
-    alert(strings.addAlert.replace("{}", tactic.name));
+    Swal.fire({
+      icon: 'success',
+      title: 'Done',
+      text: strings.addAlert.replace("{}", tactic.name),
+    });
   }
 
   function validateTacticPlayerCount(outfieldPlayers) {
@@ -429,7 +452,11 @@ GM_addStyle(
     );
 
     if (outfieldPlayers.length < minOutfieldPlayers || !isGoalkeeper) {
-      alert(strings.invalidTacticError);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: strings.invalidTacticError,
+      });
       return false;
     }
 
@@ -439,26 +466,6 @@ GM_addStyle(
   async function validateDuplicateTactic(id) {
     const tacticsData = (await GM_getValue("ls_tactics")) || { tactics: [] };
     return tacticsData.tactics.some((tactic) => tactic.id === id);
-  }
-
-  async function validateTacticName(name) {
-    if (!name) {
-      alert(strings.noTacticNameProvidedError);
-      return false;
-    }
-
-    const tacticsData = (await GM_getValue("ls_tactics")) || { tactics: [] };
-    if (tacticsData.tactics.some((t) => t.name === name)) {
-      alert(strings.alreadyExistingTacticNameError);
-      return false;
-    }
-
-    if (name.length > maxTacticNameLength) {
-      alert(strings.tacticNameLengthError);
-      return false;
-    }
-
-    return true;
   }
 
   async function saveTacticToStorage(tactic) {
@@ -490,13 +497,22 @@ GM_addStyle(
     );
 
     if (!selectedTactic) {
-      alert(strings.noTacticSelectedError);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: strings.noTacticSelectedError,
+      });
       return;
     }
 
-    const confirmed = confirm(
-      strings.deleteConfirmation.replace("{}", selectedTactic.name)
-    );
+    const confirmed = await Swal.fire({
+      title: 'Confirmation',
+      text: strings.deleteConfirmation.replace("{}", selectedTactic.name),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Delete Tactic',
+      cancelButtonText: 'Cancel',
+    }).then((result) => result.isConfirmed);
 
     if (!confirmed) {
       return;
@@ -522,7 +538,11 @@ GM_addStyle(
       tacticsDropdownMenu.selectedIndex = 0;
     }
 
-    alert(strings.deleteAlert.replace("{}", selectedTactic.name));
+    Swal.fire({
+      icon: 'success',
+      title: 'Done',
+      text: strings.deleteAlert.replace("{}", selectedTactic.name),
+    });
   }
 
   // _____Rename tactic_____
@@ -548,15 +568,31 @@ GM_addStyle(
     );
 
     if (!selectedTactic) {
-      alert(strings.noTacticSelectedError);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: strings.noTacticSelectedError,
+      });
       return;
     }
 
-    const oldName = selectedTactic.name;
+    const newName = await Swal.fire({
+      title: strings.tacticNamePrompt,
+      input: 'text',
+      inputValidator: (value) => {
+        if (!value) {
+          return strings.noTacticNameProvidedError;
+        }
+        if (value.length > maxTacticNameLength) {
+          return strings.tacticNameLengthError;
+        }
+        if (dropdownMenuTactics.some((t) => t.name === value)) {
+          return strings.alreadyExistingTacticNameError;
+        }
+      },
+    }).then((result) => result.value);
 
-    const newName = prompt(strings.tacticNamePrompt);
-    const isValidName = await validateTacticName(newName);
-    if (!isValidName) {
+    if (!newName) {
       return;
     }
 
@@ -584,8 +620,11 @@ GM_addStyle(
     selectedOption.value = newName;
     selectedOption.textContent = newName;
 
-    const replacements = [oldName, newName];
-    alert(strings.renameAlert.replace(/\{\}/g, () => replacements.shift()));
+    Swal.fire({
+      icon: 'success',
+      title: 'Done',
+      text: strings.renameAlert.replace("{}", selectedTactic.name).replace("{}", newName),
+    });
   }
 
   // _____Update tactic_____
@@ -615,7 +654,11 @@ GM_addStyle(
     );
 
     if (!selectedTactic) {
-      alert(strings.noTacticSelectedError);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: strings.noTacticSelectedError,
+      });
       return;
     }
 
@@ -637,7 +680,11 @@ GM_addStyle(
       case "unchanged":
         return;
       case "duplicate":
-        alert(strings.duplicateTacticError);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: strings.duplicateTacticError,
+        });
         return;
       case "unique":
         break;
@@ -645,9 +692,14 @@ GM_addStyle(
         return;
     }
 
-    const confirmed = confirm(
-      strings.updateConfirmation.replace("{}", selectedTactic.name)
-    );
+    const confirmed = await Swal.fire({
+      title: 'Confirmation',
+      text: strings.updateConfirmation.replace("{}", selectedTactic.name),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Update',
+      cancelButtonText: 'Cancel',
+    }).then((result) => result.isConfirmed);
 
     if (!confirmed) {
       return;
@@ -669,7 +721,11 @@ GM_addStyle(
 
     await GM_setValue("ls_tactics", tacticsData);
 
-    alert(strings.updateAlert.replace("{}", selectedTactic.name));
+    Swal.fire({
+      icon: 'success',
+      title: 'Done',
+      text: strings.updateAlert.replace("{}", selectedTactic.name),
+    });
   }
 
   async function validateDuplicateTacticWithUpdatedCoord(
@@ -700,7 +756,14 @@ GM_addStyle(
   }
 
   async function clearTactics() {
-    const confirmed = confirm(strings.clearConfirmation);
+    const confirmed = await Swal.fire({
+      title: 'Confirmation',
+      text: strings.clearConfirmation,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Clear Tactics',
+      cancelButtonText: 'Cancel',
+    }).then((result) => result.isConfirmed);
 
     if (!confirmed) {
       return;
@@ -715,7 +778,11 @@ GM_addStyle(
     tacticsDropdownMenu.innerHTML = "";
     tacticsDropdownMenu.disabled = true;
 
-    alert(strings.clearAlert);
+    Swal.fire({
+      icon: 'success',
+      title: 'Done',
+      text: strings.clearAlert,
+    });
   }
 
   // _____Reset default settings_____
@@ -732,7 +799,14 @@ GM_addStyle(
   }
 
   async function resetTactics() {
-    const confirmed = confirm(strings.resetConfirmation);
+    const confirmed = await Swal.fire({
+      title: 'Confirmation',
+      text: strings.resetConfirmation,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Reset Tactics',
+      cancelButtonText: 'Cancel',
+    }).then((result) => result.isConfirmed);
 
     if (!confirmed) {
       return;
@@ -753,7 +827,11 @@ GM_addStyle(
     addTacticsToDropdownMenu(tacticsDropdownMenu, dropdownMenuTactics);
     tacticsDropdownMenu.disabled = false;
 
-    alert(strings.resetAlert);
+    Swal.fire({
+      icon: 'success',
+      title: 'Done',
+      text: strings.resetAlert,
+    });
   }
 
   // _____Import/Export_____
@@ -889,12 +967,12 @@ GM_addStyle(
     const list = document.createElement("ul");
 
     hrefs.forEach((href, title) => {
-        const listItem = document.createElement("li");
-        const link = document.createElement("a");
-        link.href = href;
-        link.textContent = title;
-        listItem.appendChild(link);
-        list.appendChild(listItem);
+      const listItem = document.createElement("li");
+      const link = document.createElement("a");
+      link.href = href;
+      link.textContent = title;
+      listItem.appendChild(link);
+      list.appendChild(listItem);
     });
 
     return list;
@@ -980,16 +1058,16 @@ GM_addStyle(
     setupButton(button, "audio_button", "🔊");
 
     const audioUrls = [
-        "https://ia802609.us.archive.org/16/items/w-w-w-d-e-e-p-d-i-v-e-c-o-m-wg7bkk/Webinar%E2%84%A2%20-%20w%20w%20w%20.%20d%20e%20e%20p%20d%20i%20v%20e%20.%20c%20o%20m%20-%2005%20URL%20%E6%B9%96.mp3",
-        "https://ia802306.us.archive.org/15/items/remember-this-night-w6kvvl/COSMIC%20CYCLER%20-%20Remember%20This%20Night%20-%2009%20Night%20Breeze.mp3",
-        "https://ia802300.us.archive.org/32/items/01.-dj-mixed-by-atsushi-ohara/Ridge%20Racer%20Soundtrack%20Collection/2006%20-%20Ridge%20Racers%202%20Direct%20Audio/11.%20Quiet%20Curves.mp3",
-        "https://ia801701.us.archive.org/18/items/architectureintokyo-singles2013-2018/architecture%20in%20tokyo%20-%20singles%20%282013-2018%29%20-%2005%20marble%20%28ft.%20ULTRA%20%E3%82%A6%E3%83%AB%E3%83%88%E3%83%A9%29.mp3",
-        "https://ia802306.us.archive.org/28/items/remember-this-night-w9vygv/COSMIC%20CYCLER%20-%20Remember%20This%20Night%20-%2006%20Living%20in%20Your%20Eyes.mp3",
-        "https://ia801403.us.archive.org/24/items/ElisTom1AguasDeMarco/ElisTom1Aguas%20de%20marco.mp3",
-        "https://ia800103.us.archive.org/18/items/azzahradibaku_gmail_Gana/Elis%20Regina%20e%20Adoniran%20Barbosa%20-%20Tiro%20ao%20%C3%81lvaro.mp3",
-        "https://ia601404.us.archive.org/29/items/flying-beagle/The%20Second%20Summer.mp3",
-        "https://ia801001.us.archive.org/25/items/101AirLaFemmeDargent/108-air_-_ce_matin_la.mp3",
-        "https://ia804500.us.archive.org/7/items/special-night-w9vkyb/Cosmic%20Cycler%20-%20Special%20Night%20-%2003%20Trying%20to%20Relax.mp3",
+      "https://ia802609.us.archive.org/16/items/w-w-w-d-e-e-p-d-i-v-e-c-o-m-wg7bkk/Webinar%E2%84%A2%20-%20w%20w%20w%20.%20d%20e%20e%20p%20d%20i%20v%20e%20.%20c%20o%20m%20-%2005%20URL%20%E6%B9%96.mp3",
+      "https://ia802306.us.archive.org/15/items/remember-this-night-w6kvvl/COSMIC%20CYCLER%20-%20Remember%20This%20Night%20-%2009%20Night%20Breeze.mp3",
+      "https://ia802300.us.archive.org/32/items/01.-dj-mixed-by-atsushi-ohara/Ridge%20Racer%20Soundtrack%20Collection/2006%20-%20Ridge%20Racers%202%20Direct%20Audio/11.%20Quiet%20Curves.mp3",
+      "https://ia801701.us.archive.org/18/items/architectureintokyo-singles2013-2018/architecture%20in%20tokyo%20-%20singles%20%282013-2018%29%20-%2005%20marble%20%28ft.%20ULTRA%20%E3%82%A6%E3%83%AB%E3%83%88%E3%83%A9%29.mp3",
+      "https://ia802306.us.archive.org/28/items/remember-this-night-w9vygv/COSMIC%20CYCLER%20-%20Remember%20This%20Night%20-%2006%20Living%20in%20Your%20Eyes.mp3",
+      "https://ia801403.us.archive.org/24/items/ElisTom1AguasDeMarco/ElisTom1Aguas%20de%20marco.mp3",
+      "https://ia800103.us.archive.org/18/items/azzahradibaku_gmail_Gana/Elis%20Regina%20e%20Adoniran%20Barbosa%20-%20Tiro%20ao%20%C3%81lvaro.mp3",
+      "https://ia601404.us.archive.org/29/items/flying-beagle/The%20Second%20Summer.mp3",
+      "https://ia801001.us.archive.org/25/items/101AirLaFemmeDargent/108-air_-_ce_matin_la.mp3",
+      "https://ia804500.us.archive.org/7/items/special-night-w9vkyb/Cosmic%20Cycler%20-%20Special%20Night%20-%2003%20Trying%20to%20Relax.mp3",
     ];
 
     const audios = audioUrls.map(url => new Audio(url));
@@ -998,22 +1076,22 @@ GM_addStyle(
     let currentAudio = null;
 
     button.addEventListener("click", function () {
-        if (!isPlaying) {
-            currentAudio = playRandomAudio(audios);
-            isPlaying = true;
-        } else {
-            pauseAudio(currentAudio);
-            isPlaying = false;
-        }
-        updateAudioIcon(button, isPlaying);
+      if (!isPlaying) {
+        currentAudio = playRandomAudio(audios);
+        isPlaying = true;
+      } else {
+        pauseAudio(currentAudio);
+        isPlaying = false;
+      }
+      updateAudioIcon(button, isPlaying);
     });
 
     return button;
-}
+  }
 
   const playRandomAudio = (audios) => {
     if (audios.length === 0) {
-        return;
+      return;
     }
 
     const randomIdx = Math.floor(Math.random() * audios.length);
@@ -1025,15 +1103,15 @@ GM_addStyle(
 
   const playAudio = (currAudio, audios) => {
     currAudio.play();
-    currAudio.onended = function() {
-        playRandomAudio(audios);
+    currAudio.onended = function () {
+      playRandomAudio(audios);
     };
   }
 
   const pauseAudio = (audio) => {
     if (audio) {
-        audio.pause();
-        audio.currentTime = 0;
+      audio.pause();
+      audio.currentTime = 0;
     }
   }
 
@@ -1309,6 +1387,7 @@ GM_addStyle(
 
   function setupButton(button, id, textContent) {
     button.id = id;
+    button.classList.add('mzbtn');
     button.textContent = textContent;
     button.style.fontFamily = "Montserrat, sans-serif";
     button.style.fontSize = "12px";
@@ -1348,12 +1427,12 @@ GM_addStyle(
 
   function setupModalsWindowClickListener() {
     window.addEventListener("click", function (event) {
-        if (usefulLinksModal.style.display === "block" && !usefulLinksModal.contains(event.target)) {
-            hideModal(usefulLinksModal);
-        }
-        if (infoModal.style.display === "block" && !infoModal.contains(event.target)) {
-            hideModal(infoModal);
-        }
+      if (usefulLinksModal.style.display === "block" && !usefulLinksModal.contains(event.target)) {
+        hideModal(usefulLinksModal);
+      }
+      if (infoModal.style.display === "block" && !infoModal.contains(event.target)) {
+        hideModal(infoModal);
+      }
     });
   }
 
@@ -1364,7 +1443,7 @@ GM_addStyle(
       hideModal(modal);
     }
   }
-  
+
   function showModal(modal) {
     modal.style.display = "block";
     setTimeout(function () {
@@ -1378,7 +1457,7 @@ GM_addStyle(
       modal.style.display = "none";
     }, 500);
   }
-  
+
   function setupModal(modal, id) {
     modal.id = id;
     modal.style.display = "none";
