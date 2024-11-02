@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
-// @version      7.4
+// @version      7.5
 // @description  Adds a dropdown menu with overused tactics and lets you save your own tactics for quick access later on.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
@@ -27,7 +27,7 @@ GM_addStyle(
   let dropdownMenuTactics = [];
 
   const defaultTacticsDataUrl =
-    "https://raw.githubusercontent.com/douglasdotv/tactics-selector/main/json/tactics.json?callback=?";
+    "https://u18mz.vercel.app/json/tactics.json";
 
   let activeLanguage;
 
@@ -157,7 +157,7 @@ GM_addStyle(
             [activeLanguage]: {
               translation: await (
                 await fetch(
-                  `https://raw.githubusercontent.com/douglasdotv/tactics-selector/main/json/lang/${activeLanguage}.json?callback=?`
+                  `https://u18mz.vercel.app/json/lang/${activeLanguage}.json`
                 )
               ).json(),
             },
@@ -1144,7 +1144,7 @@ GM_addStyle(
 
   async function changeLanguage(languageCode) {
     try {
-      const translationDataUrl = `https://raw.githubusercontent.com/douglasdotv/tactics-selector/main/json/lang/${languageCode}.json?callback=?`;
+      const translationDataUrl = `https://u18mz.vercel.app/json/lang/${languageCode}.json`;
       const translations = await (await fetch(translationDataUrl)).json();
 
       i18next.changeLanguage(languageCode);
