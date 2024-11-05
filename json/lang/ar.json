@@ -1,5 +1,6 @@
 {
   "addButton": "أضف الخطة الحالية",
+  "addWithXmlButton": "أضف خطة باستخدام XML",
   "deleteButton": "حذف الخطة",
   "renameButton": "إعادة تسمية الخطة",
   "updateButton": "تحديث الخطة",

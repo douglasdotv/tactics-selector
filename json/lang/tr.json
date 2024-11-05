@@ -1,5 +1,6 @@
 {
   "addButton": "Mevcut taktiği ekle",
+  "addWithXmlButton": "XML ile Taktiği Ekle",
   "deleteButton": "Taktiği sil",
   "renameButton": "Taktiğin adını değiştir",
   "updateButton": "Taktiği güncelle",

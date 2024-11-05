@@ -1,5 +1,6 @@
 {
   "addButton": "Tilføj aktuel taktik",
+  "addWithXmlButton": "Tilføj taktik med XML",
   "deleteButton": "Slet taktik",
   "renameButton": "Omdøb taktik",
   "updateButton": "Opdater taktik",

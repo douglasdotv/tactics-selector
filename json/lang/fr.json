@@ -1,5 +1,6 @@
 {
   "addButton": "Ajouter la tactique actuelle",
+  "addWithXmlButton": "Ajouter la tactique avec XML",
   "deleteButton": "Supprimer la tactique",
   "renameButton": "Renommer la tactique",
   "updateButton": "Mettre à jour la tactique",

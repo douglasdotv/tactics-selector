@@ -1,5 +1,6 @@
 {
   "addButton": "Huidige tactiek toevoegen",
+  "addWithXmlButton": "Tactiek toevoegen met XML",
   "deleteButton": "Tactiek verwijderen",
   "renameButton": "Tactiek hernoemen",
   "updateButton": "Tactiek bijwerken",

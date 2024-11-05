@@ -1,5 +1,6 @@
 {
   "addButton": "Tambahkan taktik saat ini",
+  "addWithXmlButton": "Tambahkan taktik dengan XML",
   "deleteButton": "Hapus taktik",
   "renameButton": "Ubah nama taktik",
   "updateButton": "Perbarui taktik",

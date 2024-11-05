@@ -1,5 +1,6 @@
 {
   "addButton": "현재 전략 추가",
+  "addWithXmlButton": "XML로 전술 추가",
   "deleteButton": "전략 삭제",
   "renameButton": "전략 이름 바꾸기",
   "updateButton": "전략 업데이트",

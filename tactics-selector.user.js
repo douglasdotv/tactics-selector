@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
-// @version      7.5
+// @version      7.6
 // @description  Adds a dropdown menu with overused tactics and lets you save your own tactics for quick access later on.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
@@ -75,6 +75,7 @@ GM_addStyle(
 
   const strings = {
     addButton: "",
+    addWithXmlButton: "",
     deleteButton: "",
     renameButton: "",
     updateButton: "",
@@ -110,6 +111,7 @@ GM_addStyle(
 
   const elementStringKeys = {
     add_tactic_button: "addButton",
+    add_tactic_with_xml_button: "addWithXmlButton",
     delete_tactic_button: "deleteButton",
     rename_tactic_button: "renameButton",
     update_tactic_button: "updateButton",
@@ -912,6 +914,116 @@ GM_addStyle(
     URL.revokeObjectURL(url);
   }
 
+  // _____Import as XML Button_____
+
+  function createAddNewTacticWithXmlButton() {
+    const button = document.createElement("button");
+    setupButton(button, "add_tactic_with_xml_button", strings.addWithXmlButton);
+
+    button.addEventListener("click", function () {
+      addNewTacticAsXml().catch(console.error);
+    });
+
+    return button;
+  }
+
+  async function addNewTacticAsXml() {
+    const { value: formValues } = await Swal.fire({
+      title: '',
+      html:
+        '<textarea id="xml_textarea" rows="10" cols="50" placeholder="XML"></textarea>' +
+        '<br><input id="tactic_name_input" placeholder="Name">',
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: 'Add',
+      preConfirm: () => {
+        const xmlString = document.getElementById('xml_textarea').value;
+        const tacticName = document.getElementById('tactic_name_input').value;
+        if (!xmlString || !tacticName) {
+          Swal.showValidationMessage('Please enter both the XML and a tactic name');
+        } else if (tacticName.length > maxTacticNameLength) {
+          Swal.showValidationMessage(strings.tacticNameLengthError);
+        } else if (dropdownMenuTactics.some((t) => t.name === tacticName)) {
+          Swal.showValidationMessage(strings.alreadyExistingTacticNameError);
+        }
+        return { xmlString, tacticName };
+      }
+    });
+
+    if (!formValues) {
+      return;
+    }
+
+    const { xmlString, tacticName } = formValues;
+
+    try {
+      const newTactic = await convertXmlToTacticJson(xmlString, tacticName);
+
+      const tacticId = generateUniqueId(newTactic.coordinates);
+
+      const isDuplicate = await validateDuplicateTactic(tacticId);
+      if (isDuplicate) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: strings.duplicateTacticError,
+        });
+        return;
+      }
+
+      newTactic.id = tacticId;
+
+      await saveTacticToStorage(newTactic);
+
+      const tacticsDropdownMenu = document.getElementById('tactics_dropdown_menu');
+      addTacticsToDropdownMenu(tacticsDropdownMenu, [newTactic]);
+      dropdownMenuTactics.push(newTactic);
+
+      tacticsDropdownMenu.value = newTactic.name;
+      handleTacticsSelection(newTactic.name);
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Done',
+        text: strings.addAlert.replace('{}', newTactic.name),
+      });
+
+    } catch (error) {
+      console.error('Error adding tactic as XML:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Failed to parse XML. Please ensure the XML is a valid tactic and try again.',
+      });
+    }
+  }
+
+  async function convertXmlToTacticJson(xmlString, tacticName) {
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlString, 'text/xml');
+
+    const parserError = xmlDoc.getElementsByTagName('parsererror');
+    if (parserError.length > 0) {
+      throw new Error('Invalid XML');
+    }
+
+    const posElements = Array.from(xmlDoc.getElementsByTagName('Pos'));
+    const normalPosElements = posElements.filter(el => el.getAttribute('pos') === 'normal');
+
+    const coordinates = normalPosElements.map(el => {
+      const x = parseInt(el.getAttribute('x'));
+      const y = parseInt(el.getAttribute('y'));
+      const htmlLeft = x - 7;
+      const htmlTop = y - 9;
+      return [htmlLeft, htmlTop];
+    });
+
+    return {
+      name: tacticName,
+      coordinates: coordinates,
+    };
+  }
+
   // _____Useful Links Button_____
 
   function createUsefulLinksButton() {
@@ -1307,6 +1419,7 @@ GM_addStyle(
     );
 
     const addNewTacticBtn = createAddNewTacticButton();
+    const addNewTacticAsXmlBtn = createAddNewTacticWithXmlButton();
     const deleteTacticBtn = createDeleteTacticButton();
     const renameTacticBtn = createRenameTacticButton();
     const updateTacticBtn = createUpdateTacticButton();
@@ -1320,6 +1433,7 @@ GM_addStyle(
 
     appendChildren(secondRow, [
       addNewTacticBtn,
+      addNewTacticAsXmlBtn,
       deleteTacticBtn,
       renameTacticBtn,
       updateTacticBtn,

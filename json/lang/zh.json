@@ -1,5 +1,6 @@
 {
   "addButton": "添加当前战术",
+  "addWithXmlButton": "通过XML添加战术",
   "deleteButton": "删除战术",
   "renameButton": "重命名战术",
   "updateButton": "更新战术",
