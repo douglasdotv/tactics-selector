@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
-// @version      7.6
+// @version      7.7
 // @description  Adds a dropdown menu with overused tactics and lets you save your own tactics for quick access later on.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
@@ -31,47 +31,27 @@ GM_addStyle(
 
   let activeLanguage;
 
-  const flagsDataUrl = {
-    gb: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/gb.svg",
-    br: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/br.svg",
-    cn: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/cn.svg",
-    se: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/se.svg",
-    no: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/no.svg",
-    dk: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/dk.svg",
-    ar: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/ar.svg",
-    pl: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/pl.svg",
-    nl: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/nl.svg",
-    id: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/id.svg",
-    de: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/de.svg",
-    it: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/it.svg",
-    fr: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/fr.svg",
-    ro: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/ro.svg",
-    tr: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/tr.svg",
-    kr: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/kr.svg",
-    ru: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/ru.svg",
-    sa: "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/sa.svg",
-  };
-
+  const baseFlagUrl = "https://raw.githubusercontent.com/lipis/flag-icons/d6785f2434e54e775d55a304733d17b048eddfb5/flags/4x3/";
   const languages = [
-    { code: "en", name: "English", flag: flagsDataUrl.gb },
-    { code: "pt", name: "Português", flag: flagsDataUrl.br },
-    { code: "zh", name: "中文", flag: flagsDataUrl.cn },
-    { code: "sv", name: "Svenska", flag: flagsDataUrl.se },
-    { code: "no", name: "Norsk", flag: flagsDataUrl.no },
-    { code: "da", name: "Dansk", flag: flagsDataUrl.dk },
-    { code: "es", name: "Español", flag: flagsDataUrl.ar },
-    { code: "pl", name: "Polski", flag: flagsDataUrl.pl },
-    { code: "nl", name: "Nederlands", flag: flagsDataUrl.nl },
-    { code: "id", name: "Bahasa Indonesia", flag: flagsDataUrl.id },
-    { code: "de", name: "Deutsch", flag: flagsDataUrl.de },
-    { code: "it", name: "Italiano", flag: flagsDataUrl.it },
-    { code: "fr", name: "Français", flag: flagsDataUrl.fr },
-    { code: "ro", name: "Română", flag: flagsDataUrl.ro },
-    { code: "tr", name: "Türkçe", flag: flagsDataUrl.tr },
-    { code: "ko", name: "한국어", flag: flagsDataUrl.kr },
-    { code: "ru", name: "Русский", flag: flagsDataUrl.ru },
-    { code: "ar", name: "العربية", flag: flagsDataUrl.sa },
-  ];
+    { code: "en", name: "English", flag: `${baseFlagUrl}gb.svg` },
+    { code: "pt", name: "Português", flag: `${baseFlagUrl}br.svg` },
+    { code: "zh", name: "中文", flag: `${baseFlagUrl}cn.svg` },
+    { code: "sv", name: "Svenska", flag: `${baseFlagUrl}se.svg` },
+    { code: "no", name: "Norsk", flag: `${baseFlagUrl}no.svg` },
+    { code: "da", name: "Dansk", flag: `${baseFlagUrl}dk.svg` },
+    { code: "es", name: "Español", flag: `${baseFlagUrl}ar.svg` },
+    { code: "pl", name: "Polski", flag: `${baseFlagUrl}pl.svg` },
+    { code: "nl", name: "Nederlands", flag: `${baseFlagUrl}nl.svg` },
+    { code: "id", name: "Bahasa Indonesia", flag: `${baseFlagUrl}id.svg` },
+    { code: "de", name: "Deutsch", flag: `${baseFlagUrl}de.svg` },
+    { code: "it", name: "Italiano", flag: `${baseFlagUrl}it.svg` },
+    { code: "fr", name: "Français", flag: `${baseFlagUrl}fr.svg` },
+    { code: "ro", name: "Română", flag: `${baseFlagUrl}ro.svg` },
+    { code: "tr", name: "Türkçe", flag: `${baseFlagUrl}tr.svg` },
+    { code: "ko", name: "한국어", flag: `${baseFlagUrl}kr.svg` },
+    { code: "ru", name: "Русский", flag: `${baseFlagUrl}ru.svg` },
+    { code: "ar", name: "العربية", flag: `${baseFlagUrl}sa.svg` },
+  ]
 
   const strings = {
     addButton: "",
