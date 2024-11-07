@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MZ Tactics Selector
 // @namespace    douglaskampl
-// @version      7.7
+// @version      7.8
 // @description  Adds a dropdown menu with overused tactics and lets you save your own tactics for quick access later on.
 // @author       Douglas Vieira
 // @match        https://www.managerzone.com/?p=tactics
@@ -558,9 +558,12 @@ GM_addStyle(
       return;
     }
 
+    const oldName = selectedTactic.name;
+
     const newName = await Swal.fire({
       title: strings.tacticNamePrompt,
       input: 'text',
+      inputValue: oldName,  // Pre-fill the input with the current name
       inputValidator: (value) => {
         if (!value) {
           return strings.noTacticNameProvidedError;
@@ -568,7 +571,7 @@ GM_addStyle(
         if (value.length > maxTacticNameLength) {
           return strings.tacticNameLengthError;
         }
-        if (dropdownMenuTactics.some((t) => t.name === value)) {
+        if (value !== oldName && dropdownMenuTactics.some((t) => t.name === value)) {
           return strings.alreadyExistingTacticNameError;
         }
       },
@@ -605,7 +608,7 @@ GM_addStyle(
     Swal.fire({
       icon: 'success',
       title: 'Done',
-      text: strings.renameAlert.replace("{}", selectedTactic.name).replace("{}", newName),
+      text: strings.renameAlert.replace("{}", oldName).replace("{}", newName),
     });
   }
 
